@@ -34,3 +34,11 @@ If you use aliases or environment variables within your login profiles to set de
 your PowerShell profile and populate it as above for a similar experience.
 
 The import of these functions replaces any PowerShell aliases that conflict with the commands.
+
+## Usage
+
+* Add the contents of [PowerShell-WSL-Interop.ps1](https://github.com/mikebattista/PowerShell-WSL-Interop/blob/master/PowerShell-WSL-Interop.ps1) to your PowerShell profile
+* Set `$commands` within `Import-WSLCommands` to the list of commands you'd like to import
+* (Optionally) Update the `$F` switch within `Import-WSLCommands` to map the commands to the bash completion function returned by `complete | grep <COMMAND>$` within bash (e.g. `complete -F _longopt less` means bash uses the `_longopt` function to complete for `less`)
+    * Note: bash loads shell completion functions on demand for many commands so you may need to attempt argument completion within bash first for a given command before `complete` will return its completion spec.
+* (Optionally) Define a hash table called `$WSLDefaultParameterValues` and set default arguments for commands using the pattern `$WSLDefaultParameterValues["<COMMAND>"] = "<ARGS>"` (e.g. `$WSLDefaultParameterValues["ls"] = "-AFh --group-directories-first"`)
