@@ -1,6 +1,6 @@
 # PowerShell-WSL-Interop
 
-WSL enables calling Linux commands directly within PowerShell via `wsl.exe` (e.g. `wsl date`). While more convenient
+The [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about) enables calling Linux commands directly within PowerShell via `wsl.exe` (e.g. `wsl date`). While more convenient
 than a full context switch into WSL, it has the following limitations:
 
 * Prefixing commands with `wsl` is tedious and unnatural
