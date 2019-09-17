@@ -43,3 +43,7 @@ The import of these functions replaces any PowerShell aliases that conflict with
 * (Optionally) Update the `$F` switch within `Import-WSLCommands` to map the commands to the bash completion functions returned by `complete | grep <COMMAND>$` within bash (e.g. `complete -F _longopt less` means bash uses the `_longopt` function to complete for `less`)
     * Note: bash loads shell completion functions on demand for many commands so you may need to attempt argument completion within bash first for a given command before `complete` will return its completion spec.
 * (Optionally) Define a hash table called `$WSLDefaultParameterValues` and set default arguments for commands using the pattern `$WSLDefaultParameterValues["<COMMAND>"] = "<ARGS>"`
+
+## Known Issues
+
+* PowerShell treats parameters as case-insensitive so will not differentiate between CompletionResults that only differ by case (e.g. -a and -A). Completion results returned by bash that only differ by case will be treated as one CompletionResult. You can still pass both variants on the command line, but argument completion will only present one.
