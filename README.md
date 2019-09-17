@@ -46,4 +46,5 @@ The import of these functions replaces any PowerShell aliases that conflict with
 
 ## Known Issues
 
+* Windows PowerShell is not supported. [PowerShell Core](https://github.com/powershell/powershell#get-powershell) is required.
 * PowerShell treats parameters as case-insensitive so will not differentiate between CompletionResults that only differ by case (e.g. -a and -A). Completion results returned by bash that only differ by case will be treated as one CompletionResult. You can still pass both variants on the command line, but argument completion will only present one.
