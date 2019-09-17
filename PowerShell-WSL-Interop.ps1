@@ -58,7 +58,7 @@ function Import-WSLCommands() {
     #>
 
     # The commands to import.
-    $commands = "awk", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"
+    $commands = "awk", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail"
 
     # Register a function for each command.
     $commands | ForEach-Object { Invoke-Expression @"
