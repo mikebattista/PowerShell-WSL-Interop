@@ -121,10 +121,12 @@ function Import-WSLCommands() {
 
         if ($wordToComplete -like "*=") {
             (wsl.exe $commandLine) -split ' ' |
+            Sort-Object |
             ForEach-Object { [System.Management.Automation.CompletionResult]::new($wordToComplete + $_, $_, 'ParameterName', $_) }
         } else {
             (wsl.exe $commandLine) -split ' ' |
             Where-Object { $commandAst.CommandElements.Extent.Text -notcontains $_ } |
+            Sort-Object |
             ForEach-Object { [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterName', $_) }
         }
     }
