@@ -1,22 +1,3 @@
-function ConvertTo-WSLPath([string] $path) {
-    <#
-    .SYNOPSIS
-    Convert a Windows path to a WSL path.
-
-    .DESCRIPTION
-    Replace backward slashes with forward slashes and map absolute paths to the appropriate
-    mount point under /mnt within WSL.
-    #>
-
-    $path = $path -replace "\\", "/"
-                
-    if ($path -match "^(\w):") {
-        $path = $path -replace $matches[0], "/mnt/$($matches[1].ToLower())"
-    }
-
-    return $path
-}
-
 function Import-WSLCommands() {
     <#
     .SYNOPSIS
@@ -66,7 +47,7 @@ function Import-WSLCommands() {
     function global:$_() {
         for (`$i = 0; `$i -lt `$args.Length; `$i++) {
             if (Test-Path `$args[`$i] -ErrorAction Ignore) {
-                `$args[`$i] = ConvertTo-WSLPath `$args[`$i]
+                `$args[`$i] = wsl.exe wslpath ```'`$(`$args[`$i])```'
             }
         }
 
