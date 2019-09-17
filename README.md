@@ -37,6 +37,7 @@ The import of these functions replaces any PowerShell aliases that conflict with
 
 ## Usage
 
+* Install the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 * Add the contents of [PowerShell-WSL-Interop.ps1](https://github.com/mikebattista/PowerShell-WSL-Interop/blob/master/PowerShell-WSL-Interop.ps1) to your PowerShell profile
 * Set `$commands` within `Import-WSLCommands` to the list of commands you'd like to import
 * (Optionally) Update the `$F` switch within `Import-WSLCommands` to map the commands to the bash completion function returned by `complete | grep <COMMAND>$` within bash (e.g. `complete -F _longopt less` means bash uses the `_longopt` function to complete for `less`)
