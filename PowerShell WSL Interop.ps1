@@ -135,7 +135,7 @@ function Import-WSLCommands() {
         }
     }
 
-    # Helper function to escape characters in arguments passed to WSL.
+    # Helper function to escape characters in arguments passed to WSL that would otherwise be misinterpreted.
     function global:Format-WSLArgument([string]$arg) {
         return ($arg -replace " ", "\ ") -replace "([()])", '\`$1'
     }
