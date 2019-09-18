@@ -121,7 +121,7 @@ function Import-WSLCommands() {
             (wsl.exe $commandLine) -split ':' |
             Sort-Object |
             ForEach-Object {
-                $completionText = Format-WSLArgument ($wordToComplete + $_)
+                $completionText = Format-WSLArgument ($wordToComplete + $_) $true
                 [System.Management.Automation.CompletionResult]::new($completionText, $_, 'ParameterName', $_)
             }
         } else {
@@ -129,15 +129,15 @@ function Import-WSLCommands() {
             Where-Object { $commandAst.CommandElements.Extent.Text -notcontains $_ } |
             Sort-Object |
             ForEach-Object {
-                $completionText = Format-WSLArgument $_
+                $completionText = Format-WSLArgument $_ $true
                 [System.Management.Automation.CompletionResult]::new($completionText, $_, 'ParameterName', $_)
             }
         }
     }
 
     # Helper function to escape characters in arguments passed to WSL that would otherwise be misinterpreted.
-    function global:Format-WSLArgument([string]$arg) {
-        return ($arg -replace " ", "\ ") -replace "([()])", '\`$1'
+    function global:Format-WSLArgument([string]$arg, [bool]$interactive) {
+        return ($arg -replace " ", "\ ") -replace "([()])", ('\$1', '\`$1')[$interactive]
     }
 }
 
