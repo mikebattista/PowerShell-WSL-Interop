@@ -116,18 +116,24 @@ function Import-WSLCommands() {
         $commandCompletion = ". /usr/share/bash-completion/completions/$command 2> /dev/null"
         $COMPINPUT = "COMP_LINE=$COMP_LINE; COMP_WORDS=$COMP_WORDS; COMP_CWORD=$COMP_CWORD; COMP_POINT=$cursorPosition"
         $COMPGEN = "$F `"$command`" `"$wordToComplete`" `"$previousWord`" 2> /dev/null"
-        $COMPREPLY = "echo `${COMPREPLY[@]}"
+        $COMPREPLY = "IFS=':'; echo `"`${COMPREPLY[*]}`""
         $commandLine = "$bashCompletion; $commandCompletion; $COMPINPUT; $COMPGEN; $COMPREPLY" -split ' '
 
         if ($wordToComplete -like "*=") {
-            (wsl.exe $commandLine) -split ' ' |
+            (wsl.exe $commandLine) -split ':' |
             Sort-Object |
-            ForEach-Object { [System.Management.Automation.CompletionResult]::new($wordToComplete + $_, $_, 'ParameterName', $_) }
+            ForEach-Object {
+                $completionText = ($wordToComplete + $_) -replace " ", "\ "
+                [System.Management.Automation.CompletionResult]::new($completionText, $_, 'ParameterName', $_)
+            }
         } else {
-            (wsl.exe $commandLine) -split ' ' |
+            (wsl.exe $commandLine) -split ':' |
             Where-Object { $commandAst.CommandElements.Extent.Text -notcontains $_ } |
             Sort-Object |
-            ForEach-Object { [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterName', $_) }
+            ForEach-Object {
+                $completionText = $_ -replace " ", "\ "
+                [System.Management.Automation.CompletionResult]::new($completionText, $_, 'ParameterName', $_)
+            }
         }
     }
 }
