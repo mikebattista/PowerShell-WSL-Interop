@@ -46,7 +46,7 @@ function Import-WSLCommands() {
     Remove-Alias $_ -Force -ErrorAction Ignore
     function global:$_() {
         for (`$i = 0; `$i -lt `$args.Length; `$i++) {
-            if (Test-Path -IsValid `$args[`$i] -ErrorAction Ignore) {
+            if (Test-Path `$args[`$i] -ErrorAction Ignore) {
                 `$args[`$i] = Format-WSLArgument (wsl.exe wslpath `$(`$args[`$i] -replace "\\", "/"))
             }
         }
