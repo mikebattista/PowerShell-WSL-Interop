@@ -47,16 +47,14 @@ function Import-WSLCommands() {
     function global:$_() {
         for (`$i = 0; `$i -lt `$args.Length; `$i++) {
             if (Test-Path `$args[`$i] -ErrorAction Ignore) {
-                `$args[`$i] = wsl.exe wslpath `$(`$args[`$i] -replace "\\", "/")
+                `$args[`$i] = Format-WSLArgument (wsl.exe wslpath `$(`$args[`$i] -replace "\\", "/"))
             }
         }
 
-        if (`$null -eq `$WSLDefaultParameterValues) {
-            `$input | wsl.exe $_ @args
-        } elseif (`$null -ne `$WSLDefaultParameterValues["Disabled"] -and `$WSLDefaultParameterValues["Disabled"] -eq `$true) {
-            `$input | wsl.exe $_ @args
+        if (`$null -eq `$WSLDefaultParameterValues -or (`$null -ne `$WSLDefaultParameterValues["Disabled"] -and `$WSLDefaultParameterValues["Disabled"] -eq `$true)) {
+            `$input | wsl.exe $_ (`$args -split ' ')
         } else {
-            `$input | wsl.exe $_ (`$WSLDefaultParameterValues[`"$_`"] -split ' ') @args
+            `$input | wsl.exe $_ (`$WSLDefaultParameterValues[`"$_`"] -split ' ') (`$args -split ' ')
         }
     }
 "@
@@ -123,7 +121,7 @@ function Import-WSLCommands() {
             (wsl.exe $commandLine) -split ':' |
             Sort-Object |
             ForEach-Object {
-                $completionText = (($wordToComplete + $_) -replace " ", "\ ") -replace "([()])", '\`$1'
+                $completionText = Format-WSLArgument ($wordToComplete + $_)
                 [System.Management.Automation.CompletionResult]::new($completionText, $_, 'ParameterName', $_)
             }
         } else {
@@ -131,10 +129,15 @@ function Import-WSLCommands() {
             Where-Object { $commandAst.CommandElements.Extent.Text -notcontains $_ } |
             Sort-Object |
             ForEach-Object {
-                $completionText = ($_ -replace " ", "\ ") -replace "([()])", '\`$1'
+                $completionText = Format-WSLArgument $_
                 [System.Management.Automation.CompletionResult]::new($completionText, $_, 'ParameterName', $_)
             }
         }
+    }
+
+    # Helper function to escape characters in arguments passed to WSL.
+    function global:Format-WSLArgument([string]$arg) {
+        return ($arg -replace " ", "\ ") -replace "([()])", '\`$1'
     }
 }
 
