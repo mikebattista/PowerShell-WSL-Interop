@@ -47,7 +47,7 @@ function Import-WSLCommands() {
     function global:$_() {
         for (`$i = 0; `$i -lt `$args.Length; `$i++) {
             if (Test-Path `$args[`$i] -ErrorAction Ignore) {
-                `$args[`$i] = wsl.exe wslpath ```'`$(`$args[`$i])```'
+                `$args[`$i] = wsl.exe wslpath `$(`$args[`$i] -replace "\\", "/")
             }
         }
 
