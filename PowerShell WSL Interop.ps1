@@ -123,7 +123,7 @@ function Import-WSLCommands() {
             (wsl.exe $commandLine) -split ':' |
             Sort-Object |
             ForEach-Object {
-                $completionText = ($wordToComplete + $_) -replace " ", "\ "
+                $completionText = (($wordToComplete + $_) -replace " ", "\ ") -replace "([()])", '\`$1'
                 [System.Management.Automation.CompletionResult]::new($completionText, $_, 'ParameterName', $_)
             }
         } else {
@@ -131,7 +131,7 @@ function Import-WSLCommands() {
             Where-Object { $commandAst.CommandElements.Extent.Text -notcontains $_ } |
             Sort-Object |
             ForEach-Object {
-                $completionText = $_ -replace " ", "\ "
+                $completionText = ($_ -replace " ", "\ ") -replace "([()])", '\`$1'
                 [System.Management.Automation.CompletionResult]::new($completionText, $_, 'ParameterName', $_)
             }
         }
