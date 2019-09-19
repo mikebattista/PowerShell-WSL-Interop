@@ -18,7 +18,7 @@ function Import-WSLCommands() {
     This function addresses these issues in the following ways:
     
     * By creating PowerShell function wrappers for common commands, prefixing them with wsl is no longer necessary
-    * By identifying path arguments and converting them to WSL paths, path resolution is natural as it translates seamlessly between Windows and WSL paths
+    * By identifying path arguments and converting them to WSL paths, path resolution is natural and intuitive as it translates seamlessly between Windows and WSL paths
     * Default parameters are supported by $WSLDefaultParameterValues similar to $PSDefaultParameterValues
     * Command completion is enabled by PowerShell's command completion
     * Argument completion is enabled by registering an ArgumentCompleter that shims bash's programmable completion
