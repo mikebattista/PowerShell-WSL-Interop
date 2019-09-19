@@ -10,7 +10,7 @@ The [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows
 * Command completion is not supported
 * Argument completion is not supported
 
-The `Import-WSLCommands` function addresses those issues in the following ways:
+The `Import-WSLCommands` function addresses these issues in the following ways:
 
 * By creating PowerShell function wrappers for common commands, prefixing them with `wsl` is no longer necessary
 * By identifying path arguments and converting them to WSL paths, path resolution is natural as it translates seamlessly between Windows and WSL paths
