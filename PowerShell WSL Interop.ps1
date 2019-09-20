@@ -39,7 +39,7 @@ function Import-WSLCommands() {
     #>
 
     # The commands to import.
-    $commands = "awk", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail"
+    $commands = "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"
 
     # Register a function for each command.
     $commands | ForEach-Object { Invoke-Expression @"
@@ -56,9 +56,19 @@ function Import-WSLCommands() {
         }
 
         if (`$null -eq `$WSLDefaultParameterValues -or (`$null -ne `$WSLDefaultParameterValues["Disabled"] -and `$WSLDefaultParameterValues["Disabled"] -eq `$true)) {
-            `$input | wsl.exe $_ (`$args -split ' ')
+            if (`$input.MoveNext()) {
+                `$input.Reset()
+                `$input | wsl.exe $_ (`$args -split ' ')
+            } else {
+                wsl.exe $_ (`$args -split ' ')
+            }
         } else {
-            `$input | wsl.exe $_ (`$WSLDefaultParameterValues[`"$_`"] -split ' ') (`$args -split ' ')
+            if (`$input.MoveNext()) {
+                `$input.Reset()
+                `$input | wsl.exe $_ (`$WSLDefaultParameterValues[`"$_`"] -split ' ') (`$args -split ' ')
+            } else {
+                wsl.exe $_ (`$args -split ' ')                
+            }
         }
     }
 "@
