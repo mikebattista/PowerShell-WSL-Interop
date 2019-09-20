@@ -45,7 +45,7 @@ function Import-WSLCommands() {
     $commands | ForEach-Object { Invoke-Expression @"
     Remove-Alias $_ -Force -ErrorAction Ignore
     function global:$_() {
-        for (`$i = 0; `$i -lt `$args.Length; `$i++) {
+        for (`$i = 0; `$i -lt `$args.Count; `$i++) {
             # If a path is absolute with a qualifier (e.g. C:), run it through wslpath to map it to the appropriate mount point.
             if (Split-Path `$args[`$i] -IsAbsolute -ErrorAction Ignore) {
                 `$args[`$i] = Format-WSLArgument (wsl.exe wslpath (Format-WSLArgument (`$args[`$i] -replace "\\", "/")))
@@ -68,6 +68,7 @@ function Import-WSLCommands() {
     Register-ArgumentCompleter -CommandName $commands -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
 
+        # Map the command to the appropriate bash completion function.
         $F = switch ($commandAst.CommandElements[0].Value) {
             {$_ -in "awk", "grep", "head", "less", "ls", "sed", "seq", "tail"} {
                 "_longopt"
@@ -90,12 +91,13 @@ function Import-WSLCommands() {
             }
         }
         
+        # Populate bash programmable completion variables.
         $COMP_LINE = "`"$commandAst`""
         $COMP_WORDS = "($($commandAst.CommandElements.Extent.Text -join ' '))"
-        for ($i = 0; $i -lt $commandAst.CommandElements.Count; $i++) {
+        for ($i = 1; $i -lt $commandAst.CommandElements.Count; $i++) {
             $extent = $commandAst.CommandElements[$i].Extent
             if ($cursorPosition -lt $extent.EndColumnNumber) {
-                $previousWord = $commandAst.CommandElements[[System.Math]::Max(0, $i - 1)].Extent.Text
+                $previousWord = $commandAst.CommandElements[$i - 1].Extent.Text
                 $COMP_CWORD = $i
                 break
             } elseif ($cursorPosition -eq $extent.EndColumnNumber) {
@@ -103,7 +105,7 @@ function Import-WSLCommands() {
                 $COMP_CWORD = $i + 1
                 break
             } elseif ($cursorPosition -lt $extent.StartColumnNumber) {
-                $previousWord = $commandAst.CommandElements[[System.Math]::Max(0, $i - 1)].Extent.Text
+                $previousWord = $commandAst.CommandElements[$i - 1].Extent.Text
                 $COMP_CWORD = $i
                 break
             } elseif ($i -eq $commandAst.CommandElements.Count - 1 -and $cursorPosition -gt $extent.EndColumnNumber) {
@@ -113,6 +115,21 @@ function Import-WSLCommands() {
             }
         }
 
+        # Repopulate bash programmable completion variables for scenarios like '/mnt/c/Program Files'/<TAB> where <TAB> should continue completing the quoted path.
+        $currentExtent = $commandAst.CommandElements[$COMP_CWORD].Extent
+        $previousExtent = $commandAst.CommandElements[$COMP_CWORD - 1].Extent
+        if ($currentExtent.Text -eq "/" -and $currentExtent.StartColumnNumber -eq $previousExtent.EndColumnNumber) {
+            $previousWords = $commandAst.CommandElements[0..($COMP_CWORD - 2)].Extent.Text -join ' '
+            $remainingWords = $commandAst.CommandElements[($COMP_CWORD + 1)..($commandAst.CommandElements.Count)].Extent.Text -join ' '
+            $words = ($previousWords, $wordToComplete, $remainingWords) -join ' '
+            $COMP_LINE = "`"$words`""
+            $COMP_WORDS = "($words)"
+            $previousWord = $commandAst.CommandElements[$COMP_CWORD - 2].Extent.Text
+            $COMP_CWORD -= 1
+            $cursorPosition -= 1
+        }
+
+        # Build the command to pass to WSL.
         $command = $commandAst.CommandElements[0].Value
         $bashCompletion = ". /usr/share/bash-completion/bash_completion 2> /dev/null"
         $commandCompletion = ". /usr/share/bash-completion/completions/$command 2> /dev/null"
@@ -121,6 +138,7 @@ function Import-WSLCommands() {
         $COMPREPLY = "IFS=':'; echo `"`${COMPREPLY[*]}`""
         $commandLine = "$bashCompletion; $commandCompletion; $COMPINPUT; $COMPGEN; $COMPREPLY" -split ' '
 
+        # Invoke bash completion and return CompletionResults.
         if ($wordToComplete -like "*=") {
             (wsl.exe $commandLine) -split ':' |
             Sort-Object |
