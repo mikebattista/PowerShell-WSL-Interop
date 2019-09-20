@@ -133,7 +133,6 @@ function Import-WSLCommands() {
             $COMP_WORDS = $COMP_WORDS -replace "$($previousExtent.Text) $($currentExtent.Text)", $wordToComplete
             $previousWord = $commandAst.CommandElements[$COMP_CWORD - 2].Extent.Text
             $COMP_CWORD -= 1
-            $cursorPosition -= $currentExtent.Text.Length - 1
         }
 
         # Build the command to pass to WSL.
