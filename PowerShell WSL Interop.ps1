@@ -129,11 +129,8 @@ function Import-WSLCommands() {
         $currentExtent = $commandAst.CommandElements[$COMP_CWORD].Extent
         $previousExtent = $commandAst.CommandElements[$COMP_CWORD - 1].Extent
         if ($currentExtent.Text -like "/*" -and $currentExtent.StartColumnNumber -eq $previousExtent.EndColumnNumber) {
-            $previousWords = $commandAst.CommandElements[0..($COMP_CWORD - 2)].Extent.Text -join ' '
-            $remainingWords = $commandAst.CommandElements[($COMP_CWORD + 1)..($commandAst.CommandElements.Count)].Extent.Text -join ' '
-            $words = ($previousWords, $wordToComplete, $remainingWords) -join ' '
-            $COMP_LINE = "`"$words`""
-            $COMP_WORDS = "($words)"
+            $COMP_LINE = $COMP_LINE -replace "$($previousExtent.Text)$($currentExtent.Text)", $wordToComplete
+            $COMP_WORDS = $COMP_WORDS -replace "$($previousExtent.Text) $($currentExtent.Text)", $wordToComplete
             $previousWord = $commandAst.CommandElements[$COMP_CWORD - 2].Extent.Text
             $COMP_CWORD -= 1
             $cursorPosition -= $currentExtent.Text.Length - 1
