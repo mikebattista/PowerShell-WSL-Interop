@@ -128,7 +128,7 @@ function Import-WSLCommands() {
         # Repopulate bash programmable completion variables for scenarios like '/mnt/c/Program Files'/<TAB> where <TAB> should continue completing the quoted path.
         $currentExtent = $commandAst.CommandElements[$COMP_CWORD].Extent
         $previousExtent = $commandAst.CommandElements[$COMP_CWORD - 1].Extent
-        if ($currentExtent.Text -eq "/" -and $currentExtent.StartColumnNumber -eq $previousExtent.EndColumnNumber) {
+        if ($currentExtent.Text -like "/*" -and $currentExtent.StartColumnNumber -eq $previousExtent.EndColumnNumber) {
             $previousWords = $commandAst.CommandElements[0..($COMP_CWORD - 2)].Extent.Text -join ' '
             $remainingWords = $commandAst.CommandElements[($COMP_CWORD + 1)..($commandAst.CommandElements.Count)].Extent.Text -join ' '
             $words = ($previousWords, $wordToComplete, $remainingWords) -join ' '
@@ -136,7 +136,7 @@ function Import-WSLCommands() {
             $COMP_WORDS = "($words)"
             $previousWord = $commandAst.CommandElements[$COMP_CWORD - 2].Extent.Text
             $COMP_CWORD -= 1
-            $cursorPosition -= 1
+            $cursorPosition -= $currentExtent.Text.Length - 1
         }
 
         # Build the command to pass to WSL.
