@@ -144,7 +144,7 @@ function Import-WSLCommands() {
         $bashCompletion = ". /usr/share/bash-completion/bash_completion 2> /dev/null"
         $commandCompletion = ". /usr/share/bash-completion/completions/$command 2> /dev/null"
         $COMPINPUT = "COMP_LINE=$COMP_LINE; COMP_WORDS=$COMP_WORDS; COMP_CWORD=$COMP_CWORD; COMP_POINT=$cursorPosition"
-        $COMPGEN = "$F `"$command`" `"$wordToComplete`" `"$previousWord`" 2> /dev/null"
+        $COMPGEN = "bind `"set completion-ignore-case on`" 2> /dev/null; $F `"$command`" `"$wordToComplete`" `"$previousWord`" 2> /dev/null"
         $COMPREPLY = "IFS=':'; echo `"`${COMPREPLY[*]}`""
         $commandLine = "$bashCompletion; $commandCompletion; $COMPINPUT; $COMPGEN; $COMPREPLY" -split ' '
 
