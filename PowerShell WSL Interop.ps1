@@ -103,7 +103,7 @@ function Import-WSLCommands() {
         
         # Populate bash programmable completion variables.
         $COMP_LINE = "`"$commandAst`""
-        $COMP_WORDS = "($($commandAst.CommandElements.Extent.Text -join ' '))"
+        $COMP_WORDS = "('$($commandAst.CommandElements.Extent.Text -join "' '")')" -replace "''", "'"
         for ($i = 1; $i -lt $commandAst.CommandElements.Count; $i++) {
             $extent = $commandAst.CommandElements[$i].Extent
             if ($cursorPosition -lt $extent.EndColumnNumber) {
@@ -134,7 +134,7 @@ function Import-WSLCommands() {
         $previousExtent = $commandAst.CommandElements[$COMP_CWORD - 1].Extent
         if ($currentExtent.Text -like "/*" -and $currentExtent.StartColumnNumber -eq $previousExtent.EndColumnNumber) {
             $COMP_LINE = $COMP_LINE -replace "$($previousExtent.Text)$($currentExtent.Text)", $wordToComplete
-            $COMP_WORDS = $COMP_WORDS -replace "$($previousExtent.Text) $($currentExtent.Text)", $wordToComplete
+            $COMP_WORDS = $COMP_WORDS -replace "$($previousExtent.Text) '$($currentExtent.Text)'", $wordToComplete
             $previousWord = $commandAst.CommandElements[$COMP_CWORD - 2].Extent.Text
             $COMP_CWORD -= 1
         }
