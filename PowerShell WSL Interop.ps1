@@ -4,7 +4,7 @@ function Import-WSLCommands() {
     Import Linux commands into the session as PowerShell functions with argument completion.
 
     .DESCRIPTION
-    WSL enables calling Linux commands directly within PowerShell via wsl.exe (e.g. wsl date). While more convenient
+    WSL enables calling Linux commands directly within PowerShell via wsl.exe (e.g. wsl ls). While more convenient
     than a full context switch into WSL, it has the following limitations:
 
     * Prefixing commands with wsl is tedious and unnatural
