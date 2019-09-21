@@ -67,7 +67,7 @@ function Import-WSLCommands() {
                 `$input.Reset()
                 `$input | wsl.exe $_ (`$WSLDefaultParameterValues[`"$_`"] -split ' ') (`$args -split ' ')
             } else {
-                wsl.exe $_ (`$args -split ' ')                
+                wsl.exe $_ (`$WSLDefaultParameterValues[`"$_`"] -split ' ') (`$args -split ' ')                
             }
         }
     }
