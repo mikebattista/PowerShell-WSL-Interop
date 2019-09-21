@@ -107,18 +107,22 @@ function Import-WSLCommands() {
         for ($i = 1; $i -lt $commandAst.CommandElements.Count; $i++) {
             $extent = $commandAst.CommandElements[$i].Extent
             if ($cursorPosition -lt $extent.EndColumnNumber) {
+                # The cursor is in the middle of a word to complete.
                 $previousWord = $commandAst.CommandElements[$i - 1].Extent.Text
                 $COMP_CWORD = $i
                 break
             } elseif ($cursorPosition -eq $extent.EndColumnNumber) {
+                # The cursor is immediately after the current word.
                 $previousWord = $extent.Text
                 $COMP_CWORD = $i + 1
                 break
             } elseif ($cursorPosition -lt $extent.StartColumnNumber) {
+                # The cursor is within whitespace between the previous and current words.
                 $previousWord = $commandAst.CommandElements[$i - 1].Extent.Text
                 $COMP_CWORD = $i
                 break
             } elseif ($i -eq $commandAst.CommandElements.Count - 1 -and $cursorPosition -gt $extent.EndColumnNumber) {
+                # The cursor is within whitespace at the end of the line.
                 $previousWord = $extent.Text
                 $COMP_CWORD = $i + 1
                 break
