@@ -185,7 +185,7 @@ function Import-WSLCommands() {
         if ($interactive -and $arg.Contains(" ")) {
             return "'$arg'"
         } else {
-            return ($arg -replace " ", "\ ") -replace "([()])", ('\$1', '`$1')[$interactive]
+            return ($arg -replace " ", "\ ") -replace "([()|])", ('\$1', '`$1')[$interactive]
         }
     }
 }
