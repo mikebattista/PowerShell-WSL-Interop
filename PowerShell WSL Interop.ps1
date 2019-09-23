@@ -1,4 +1,4 @@
-function Import-WSLCommands() {
+function global:Import-WSLCommand() {
     <#
     .SYNOPSIS
     Import Linux commands into the session as PowerShell functions with argument completion.
@@ -17,7 +17,7 @@ function Import-WSLCommands() {
     
     This function addresses these issues in the following ways:
     
-    * By creating PowerShell function wrappers for common commands, prefixing them with wsl is no longer necessary
+    * By creating PowerShell function wrappers for commands, prefixing them with wsl is no longer necessary
     * By identifying path arguments and converting them to WSL paths, path resolution is natural and intuitive as it translates seamlessly between Windows and WSL paths
     * Default parameters are supported by $WSLDefaultParameterValues similar to $PSDefaultParameterValues
     * Command completion is enabled by PowerShell's command completion
@@ -36,13 +36,23 @@ function Import-WSLCommands() {
     your PowerShell profile and populate it as above for a similar experience.
 
     The import of these functions replaces any PowerShell aliases that conflict with the commands.
+
+    .PARAMETER Command
+    Specifies the commands to import.
+
+    .EXAMPLE
+    Import-WSLCommand "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"
     #>
 
-    # The commands to import.
-    $commands = "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string[]]$Command
+    )
 
     # Register a function for each command.
-    $commands | ForEach-Object { Invoke-Expression @"
+    $Command | ForEach-Object { Invoke-Expression @"
     Remove-Alias $_ -Force -ErrorAction Ignore
     function global:$_() {
         for (`$i = 0; `$i -lt `$args.Count; `$i++) {
@@ -67,7 +77,7 @@ function Import-WSLCommands() {
     }
     
     # Register an ArgumentCompleter that shims bash's programmable completion.
-    Register-ArgumentCompleter -CommandName $commands -ScriptBlock {
+    Register-ArgumentCompleter -CommandName $Command -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
 
         # Map the command to the appropriate bash completion function.
@@ -172,5 +182,3 @@ function Import-WSLCommands() {
         }
     }
 }
-
-Import-WSLCommands
