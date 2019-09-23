@@ -55,20 +55,12 @@ function Import-WSLCommands() {
             }
         }
 
-        if (`$null -eq `$WSLDefaultParameterValues -or (`$null -ne `$WSLDefaultParameterValues["Disabled"] -and `$WSLDefaultParameterValues["Disabled"] -eq `$true)) {
-            if (`$input.MoveNext()) {
-                `$input.Reset()
-                `$input | wsl.exe $_ (`$args -split ' ')
-            } else {
-                wsl.exe $_ (`$args -split ' ')
-            }
+        `$defaultArgs = ((`$WSLDefaultParameterValues.$_ -split ' '), "")[`$WSLDefaultParameterValues.Disabled -eq `$true]
+        if (`$input.MoveNext()) {
+            `$input.Reset()
+            `$input | wsl.exe $_ `$defaultArgs (`$args -split ' ')
         } else {
-            if (`$input.MoveNext()) {
-                `$input.Reset()
-                `$input | wsl.exe $_ (`$WSLDefaultParameterValues[`"$_`"] -split ' ') (`$args -split ' ')
-            } else {
-                wsl.exe $_ (`$WSLDefaultParameterValues[`"$_`"] -split ' ') (`$args -split ' ')                
-            }
+            wsl.exe $_ `$defaultArgs (`$args -split ' ')
         }
     }
 "@
