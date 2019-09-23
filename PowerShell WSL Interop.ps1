@@ -142,33 +142,24 @@ function Import-WSLCommands() {
 
         # Invoke bash completion and return CompletionResults.
         $previousCompletionText = ""
-        if ($wordToComplete -like "*=") {
-            (wsl.exe $commandLine) -split '\n' |
-            Sort-Object -Unique -CaseSensitive |
-            ForEach-Object {
-                $completionText = Format-WSLArgument ($wordToComplete + $_) $true
-                $listItemText = $completionText
-                if ($completionText -eq $previousCompletionText) {
-                    # Differentiate completions that differ only by case otherwise PowerShell will view them as duplicate.
-                    $listItemText += ' '
-                }
-                $previousCompletionText = $completionText
-                [System.Management.Automation.CompletionResult]::new($completionText, $listItemText, 'ParameterName', $completionText)
-            }
-        } else {
-            (wsl.exe $commandLine) -split '\n' |
-            Where-Object { $commandAst.CommandElements.Extent.Text -notcontains $_ } |
-            Sort-Object -Unique -CaseSensitive |
-            ForEach-Object {
+        (wsl.exe $commandLine) -split '\n' |
+        Sort-Object -Unique -CaseSensitive |
+        ForEach-Object {
+            if ($wordToComplete -match "(.*=).*") {
+                $completionText = Format-WSLArgument ($Matches[1] + $_) $true
+                $listItemText = $_
+            } else {
                 $completionText = Format-WSLArgument $_ $true
                 $listItemText = $completionText
-                if ($completionText -eq $previousCompletionText) {
-                    # Differentiate completions that differ only by case otherwise PowerShell will view them as duplicate.
-                    $listItemText += ' '
-                }
-                $previousCompletionText = $completionText
-                [System.Management.Automation.CompletionResult]::new($completionText, $listItemText, 'ParameterName', $completionText)
             }
+
+            if ($completionText -eq $previousCompletionText) {
+                # Differentiate completions that differ only by case otherwise PowerShell will view them as duplicate.
+                $listItemText += ' '
+            }
+
+            $previousCompletionText = $completionText
+            [System.Management.Automation.CompletionResult]::new($completionText, $listItemText, 'ParameterName', $completionText)
         }
     }
 
