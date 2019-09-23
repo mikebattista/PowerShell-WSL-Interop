@@ -4,7 +4,7 @@ The [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows
 
 * Prefixing commands with `wsl` is tedious and unnatural
 * Windows paths passed as arguments don't often resolve due to backslashes being interpreted as escape characters rather than directory separators
-* Windows paths passed as arguments don't often resolve due to not being translated to the appropriate mount point under `/mnt` within WSL
+* Windows paths passed as arguments don't often resolve due to not being translated to the appropriate mount point within WSL
 * Default parameters defined in WSL login profiles with aliases and environment variables aren’t honored
 * Linux path completion is not supported
 * Command completion is not supported
