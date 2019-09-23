@@ -60,7 +60,7 @@ function global:Import-WSLCommand() {
             if (Split-Path `$args[`$i] -IsAbsolute -ErrorAction Ignore) {
                 `$args[`$i] = Format-WSLArgument (wsl.exe wslpath (`$args[`$i] -replace "\\", "/"))
             # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
-            } elseif (Test-Path -IsValid `$args[`$i] -ErrorAction Ignore) {
+            } elseif (Test-Path `$args[`$i] -ErrorAction Ignore) {
                 `$args[`$i] = Format-WSLArgument (`$args[`$i] -replace "\\", "/")
             }
         }
