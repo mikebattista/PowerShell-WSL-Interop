@@ -55,6 +55,10 @@ function global:Import-WSLCommand() {
     Remove-Alias $_ -Force -ErrorAction Ignore
     function global:$_() {
         for (`$i = 0; `$i -lt `$args.Count; `$i++) {
+            if (`$null -eq `$args[`$i]) {
+                continue
+            }
+
             # If a path is absolute with a qualifier (e.g. C:), run it through wslpath to map it to the appropriate mount point.
             if (Split-Path `$args[`$i] -IsAbsolute -ErrorAction Ignore) {
                 `$args[`$i] = Format-WSLArgument (wsl.exe wslpath (`$args[`$i] -replace "\\", "/"))
