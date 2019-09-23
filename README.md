@@ -26,7 +26,6 @@ Additionally, they will honor any default parameters defined in a hash table cal
 $WSLDefaultParameterValues["grep"] = "-E"
 $WSLDefaultParameterValues["less"] = "-i"
 $WSLDefaultParameterValues["ls"] = "-AFh --group-directories-first"
-$WSLDefaultParameterValues["sed"] = "-E"
 ```
 
 If you use aliases or environment variables within your login profiles to set default parameters for commands, define a hash table called `$WSLDefaultParameterValues` within
