@@ -30,7 +30,6 @@ function global:Import-WslCommand() {
     * $WslDefaultParameterValues["grep"] = "-E"
     * $WslDefaultParameterValues["less"] = "-i"
     * $WslDefaultParameterValues["ls"] = "-AFh --group-directories-first"
-    * $WslDefaultParameterValues["sed"] = "-E"
 
     If you use aliases or environment variables within your login profiles to set default parameters for commands, define a hash table called $WslDefaultParameterValues within
     your PowerShell profile and populate it as above for a similar experience.
@@ -56,11 +55,15 @@ function global:Import-WslCommand() {
     Remove-Alias $_ -Force -ErrorAction Ignore
     function global:$_() {
         for (`$i = 0; `$i -lt `$args.Count; `$i++) {
+            if (`$null -eq `$args[`$i]) {
+                continue
+            }
+
             # If a path is absolute with a qualifier (e.g. C:), run it through wslpath to map it to the appropriate mount point.
             if (Split-Path `$args[`$i] -IsAbsolute -ErrorAction Ignore) {
                 `$args[`$i] = Format-WslArgument (wsl.exe wslpath (`$args[`$i] -replace "\\", "/"))
             # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
-            } elseif (Test-Path -IsValid `$args[`$i] -ErrorAction Ignore) {
+            } elseif (Test-Path `$args[`$i] -ErrorAction Ignore) {
                 `$args[`$i] = Format-WslArgument (`$args[`$i] -replace "\\", "/")
             }
         }
