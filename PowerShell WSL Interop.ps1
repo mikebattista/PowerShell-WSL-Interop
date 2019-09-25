@@ -1,4 +1,4 @@
-function global:Import-WSLCommand() {
+function global:Import-WslCommand() {
     <#
     .SYNOPSIS
     Import Linux commands into the session as PowerShell functions with argument completion.
@@ -19,20 +19,20 @@ function global:Import-WSLCommand() {
     
     * By creating PowerShell function wrappers for commands, prefixing them with wsl is no longer necessary
     * By identifying path arguments and converting them to WSL paths, path resolution is natural and intuitive as it translates seamlessly between Windows and WSL paths
-    * Default parameters are supported by $WSLDefaultParameterValues similar to $PSDefaultParameterValues
+    * Default parameters are supported by $WslDefaultParameterValues similar to $PSDefaultParameterValues
     * Command completion is enabled by PowerShell's command completion
     * Argument completion is enabled by registering an ArgumentCompleter that shims bash's programmable completion
 
     The commands can receive both pipeline input as well as their corresponding arguments just as if they were native to Windows.
 
-    Additionally, they will honor any default parameters defined in a hash table called $WSLDefaultParameterValues similar to $PSDefaultParameterValues. For example:
+    Additionally, they will honor any default parameters defined in a hash table called $WslDefaultParameterValues similar to $PSDefaultParameterValues. For example:
 
-    * $WSLDefaultParameterValues["grep"] = "-E"
-    * $WSLDefaultParameterValues["less"] = "-i"
-    * $WSLDefaultParameterValues["ls"] = "-AFh --group-directories-first"
-    * $WSLDefaultParameterValues["sed"] = "-E"
+    * $WslDefaultParameterValues["grep"] = "-E"
+    * $WslDefaultParameterValues["less"] = "-i"
+    * $WslDefaultParameterValues["ls"] = "-AFh --group-directories-first"
+    * $WslDefaultParameterValues["sed"] = "-E"
 
-    If you use aliases or environment variables within your login profiles to set default parameters for commands, define a hash table called $WSLDefaultParameterValues within
+    If you use aliases or environment variables within your login profiles to set default parameters for commands, define a hash table called $WslDefaultParameterValues within
     your PowerShell profile and populate it as above for a similar experience.
 
     The import of these functions replaces any PowerShell aliases that conflict with the commands.
@@ -41,7 +41,7 @@ function global:Import-WSLCommand() {
     Specifies the commands to import.
 
     .EXAMPLE
-    Import-WSLCommand "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"
+    Import-WslCommand "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"
     #>
 
     [CmdletBinding()]
@@ -58,14 +58,14 @@ function global:Import-WSLCommand() {
         for (`$i = 0; `$i -lt `$args.Count; `$i++) {
             # If a path is absolute with a qualifier (e.g. C:), run it through wslpath to map it to the appropriate mount point.
             if (Split-Path `$args[`$i] -IsAbsolute -ErrorAction Ignore) {
-                `$args[`$i] = Format-WSLArgument (wsl.exe wslpath (`$args[`$i] -replace "\\", "/"))
+                `$args[`$i] = Format-WslArgument (wsl.exe wslpath (`$args[`$i] -replace "\\", "/"))
             # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
             } elseif (Test-Path -IsValid `$args[`$i] -ErrorAction Ignore) {
-                `$args[`$i] = Format-WSLArgument (`$args[`$i] -replace "\\", "/")
+                `$args[`$i] = Format-WslArgument (`$args[`$i] -replace "\\", "/")
             }
         }
 
-        `$defaultArgs = ((`$WSLDefaultParameterValues.$_ -split ' '), "")[`$WSLDefaultParameterValues.Disabled -eq `$true]
+        `$defaultArgs = ((`$WslDefaultParameterValues.$_ -split ' '), "")[`$WslDefaultParameterValues.Disabled -eq `$true]
         if (`$input.MoveNext()) {
             `$input.Reset()
             `$input | wsl.exe $_ `$defaultArgs (`$args -split ' ')
@@ -156,10 +156,10 @@ function global:Import-WSLCommand() {
         Sort-Object -Unique -CaseSensitive |
         ForEach-Object {
             if ($wordToComplete -match "(.*=).*") {
-                $completionText = Format-WSLArgument ($Matches[1] + $_) $true
+                $completionText = Format-WslArgument ($Matches[1] + $_) $true
                 $listItemText = $_
             } else {
-                $completionText = Format-WSLArgument $_ $true
+                $completionText = Format-WslArgument $_ $true
                 $listItemText = $completionText
             }
 
@@ -174,7 +174,7 @@ function global:Import-WSLCommand() {
     }
 
     # Helper function to escape characters in arguments passed to WSL that would otherwise be misinterpreted.
-    function global:Format-WSLArgument([string]$arg, [bool]$interactive) {
+    function global:Format-WslArgument([string]$arg, [bool]$interactive) {
         if ($interactive -and $arg.Contains(" ")) {
             return "'$arg'"
         } else {
