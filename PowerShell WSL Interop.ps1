@@ -68,7 +68,7 @@ function global:Import-WslCommand() {
             }
         }
 
-        `$defaultArgs = ((`$WslDefaultParameterValues.$_ -split ' '), "")[`$WslDefaultParameterValues.Disabled -eq `$true]
+        `$defaultArgs = ((`$WslDefaultParameterValues.'$_' -split ' '), "")[`$WslDefaultParameterValues.Disabled -eq `$true]
         if (`$input.MoveNext()) {
             `$input.Reset()
             `$input | wsl.exe $_ `$defaultArgs (`$args -split ' ')
@@ -152,6 +152,10 @@ function global:Import-WslCommand() {
         (wsl.exe $commandLine) -split '\n' |
         Sort-Object -Unique -CaseSensitive |
         ForEach-Object {
+            if ($_ -eq "") {
+                continue
+            }
+
             if ($wordToComplete -match "(.*=).*") {
                 $completionText = Format-WslArgument ($Matches[1] + $_) $true
                 $listItemText = $_
