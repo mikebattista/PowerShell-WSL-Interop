@@ -83,15 +83,15 @@ function global:Import-WslCommand() {
     $global:WslCompletionFunctions = ($global:WslCompletionFunctions, [ordered]@{})[$null -eq $global:WslCompletionFunctions]
     $Command | Sort-Object | ForEach-Object {
         # Try to find the completion function.
-        $global:WslCompletionFunctions[$_] = wsl.exe ('grep -Phoz ''\bcomplete\b\N*-F ([^ ]+)(\N*\\\n)*\N*\s*' + $_ + '\s+'' /usr/share/bash-completion/bash_completion /usr/share/bash-completion/completions/' + $_ + ' 2> /dev/null | sed -Ez ''s/\bcomplete\b.*-F ([^ ]+).*/\1/''' -split ' ')
+        $global:WslCompletionFunctions[$_] = wsl.exe ('grep -Phoz ''\bcomplete\b\N*-F ([^ ]+)(\N*\\\n)*\N*\s*' + $_ + '\s+'' /usr/share/bash-completion/completions/' + $_ + ' /usr/share/bash-completion/bash_completion 2> /dev/null | sed -Ez ''s/\bcomplete\b.*-F ([^ ]+).*/\1/''' -split ' ')
         
         # If we can't find a completion function, default to _minimal which will resolve Linux file paths.
         if ($null -eq $global:WslCompletionFunctions[$_]) {
             $global:WslCompletionFunctions[$_] = "_minimal"
         }
         
-        # Remove the null terminator character which will break our calls to WSL.
-        $global:WslCompletionFunctions[$_] = $global:WslCompletionFunctions[$_].Trim([char]0)
+        # Remove null terminator characters which will break our calls to WSL and select the first completion function if multiple were returned which will be more specific.
+        $global:WslCompletionFunctions[$_] = ($global:WslCompletionFunctions[$_] -split [char]0)[0]
     }
     
     # Register an ArgumentCompleter that shims bash's programmable completion.
