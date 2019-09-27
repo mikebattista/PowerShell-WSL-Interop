@@ -79,32 +79,24 @@ function global:Import-WslCommand() {
 "@
     }
     
+    # Map the commands to the appropriate bash completion functions.
+    $global:WslCompletionFunctions = [ordered]@{}
+    $Command | Sort-Object | ForEach-Object {
+        # Try to find the completion function.
+        $global:WslCompletionFunctions[$_] = wsl.exe ('grep -Phoz ''\bcomplete\b\N*-F ([^ ]+)(\N*\\\n)*\N*\s*' + $_ + '\s+'' /usr/share/bash-completion/bash_completion /usr/share/bash-completion/completions/' + $_ + ' 2> /dev/null | sed -Ez ''s/\bcomplete\b.*-F ([^ ]+).*/\1/''' -split ' ')
+        
+        # If we can't find a completion function, default to _minimal which will resolve Linux file paths.
+        if ($null -eq $global:WslCompletionFunctions[$_]) {
+            $global:WslCompletionFunctions[$_] = "_minimal"
+        }
+        
+        # Remove the null terminator character which will break our calls to WSL.
+        $global:WslCompletionFunctions[$_] = $global:WslCompletionFunctions[$_].Trim([char]0)
+    }
+    
     # Register an ArgumentCompleter that shims bash's programmable completion.
     Register-ArgumentCompleter -CommandName $Command -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
-
-        # Map the command to the appropriate bash completion function.
-        $F = switch ($commandAst.CommandElements[0].Value) {
-            {$_ -in "awk", "grep", "head", "less", "ls", "sed", "seq", "tail"} {
-                "_longopt"
-                break
-            }
-
-            "man" {
-                "_man"
-                break
-            }
-
-            "ssh" {
-                "_ssh"
-                break
-            }
-
-            Default {
-                "_minimal"
-                break
-            }
-        }
         
         # Populate bash programmable completion variables.
         $COMP_LINE = "`"$commandAst`""
@@ -151,7 +143,7 @@ function global:Import-WslCommand() {
         $bashCompletion = ". /usr/share/bash-completion/bash_completion 2> /dev/null"
         $commandCompletion = ". /usr/share/bash-completion/completions/$command 2> /dev/null"
         $COMPINPUT = "COMP_LINE=$COMP_LINE; COMP_WORDS=$COMP_WORDS; COMP_CWORD=$COMP_CWORD; COMP_POINT=$cursorPosition"
-        $COMPGEN = "bind `"set completion-ignore-case on`" 2> /dev/null; $F `"$command`" `"$wordToComplete`" `"$previousWord`" 2> /dev/null"
+        $COMPGEN = "bind `"set completion-ignore-case on`" 2> /dev/null; $($WslCompletionFunctions[$command]) `"$command`" `"$wordToComplete`" `"$previousWord`" 2> /dev/null"
         $COMPREPLY = "IFS=`$'\n'; echo `"`${COMPREPLY[*]}`""
         $commandLine = "$bashCompletion; $commandCompletion; $COMPINPUT; $COMPGEN; $COMPREPLY" -split ' '
 
