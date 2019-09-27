@@ -80,7 +80,7 @@ function global:Import-WslCommand() {
     }
     
     # Map the commands to the appropriate bash completion functions.
-    $global:WslCompletionFunctions = [ordered]@{}
+    $global:WslCompletionFunctions = ($global:WslCompletionFunctions, [ordered]@{})[$null -eq $global:WslCompletionFunctions]
     $Command | Sort-Object | ForEach-Object {
         # Try to find the completion function.
         $global:WslCompletionFunctions[$_] = wsl.exe ('grep -Phoz ''\bcomplete\b\N*-F ([^ ]+)(\N*\\\n)*\N*\s*' + $_ + '\s+'' /usr/share/bash-completion/bash_completion /usr/share/bash-completion/completions/' + $_ + ' 2> /dev/null | sed -Ez ''s/\bcomplete\b.*-F ([^ ]+).*/\1/''' -split ' ')
