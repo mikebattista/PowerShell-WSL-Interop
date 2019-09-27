@@ -109,6 +109,8 @@ function global:Import-WslCommand() {
         # Populate bash programmable completion variables.
         $COMP_LINE = "`"$commandAst`""
         $COMP_WORDS = "('$($commandAst.CommandElements.Extent.Text -join "' '")')" -replace "''", "'"
+        $previousWord = $commandAst.CommandElements[0].Value
+        $COMP_CWORD = 1
         for ($i = 1; $i -lt $commandAst.CommandElements.Count; $i++) {
             $extent = $commandAst.CommandElements[$i].Extent
             if ($cursorPosition -lt $extent.EndColumnNumber) {
