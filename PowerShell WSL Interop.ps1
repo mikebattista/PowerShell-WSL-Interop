@@ -103,7 +103,7 @@ function global:Import-WslCommand() {
             $global:WslCompletionFunctions[$_] = ($global:WslCompletionFunctions[$_] -split [char]0)[0]
 
             # Set the cache updated flag.
-            $script:WslCompletionFunctionsCacheUpdated = $true
+            $WslCompletionFunctionsCacheUpdated = $true
         }
     }
     if ($WslCompletionFunctionsCacheUpdated) {
