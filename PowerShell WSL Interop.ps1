@@ -89,7 +89,7 @@ function global:Import-WslCommand() {
             $global:WslCompletionFunctions = @{}
         }
     }
-    $Command | Sort-Object | ForEach-Object {
+    $Command | ForEach-Object {
         if (-not $global:WslCompletionFunctions.Contains($_)) {
             # Try to find the completion function.
             $global:WslCompletionFunctions[$_] = wsl.exe ('grep -Phoz ''\bcomplete\b\N*-F ([^ ]+)(\N*\\\n)*\N*\s*' + $_ + '\s+'' /usr/share/bash-completion/completions/' + $_ + ' /usr/share/bash-completion/bash_completion 2> /dev/null | sed -Ez ''s/\bcomplete\b.*-F ([^ ]+).*/\1/''' -split ' ')
