@@ -80,11 +80,11 @@ function global:Import-WslCommand() {
     }
     
     # Map the commands to the appropriate bash completion functions.
-    $WslCompletionFunctionsCache = "$Env:APPDATA\PowerShell WSL Interop\WslCompletionFunctions"
-    $WslCompletionFunctionsCacheUpdated = $false
+    $script:WslCompletionFunctionsCache = "$Env:APPDATA\PowerShell WSL Interop\WslCompletionFunctions"
+    $script:WslCompletionFunctionsCacheUpdated = $false
     if ($null -eq $global:WslCompletionFunctions) {
-        if (Test-Path $WslCompletionFunctionsCache) {
-            $global:WslCompletionFunctions = Import-Clixml $WslCompletionFunctionsCache
+        if (Test-Path $script:WslCompletionFunctionsCache) {
+            $global:WslCompletionFunctions = Import-Clixml $script:WslCompletionFunctionsCache
         } else {
             $global:WslCompletionFunctions = @{}
         }
@@ -103,12 +103,12 @@ function global:Import-WslCommand() {
             $global:WslCompletionFunctions[$_] = ($global:WslCompletionFunctions[$_] -split [char]0)[0]
 
             # Set the cache updated flag.
-            $WslCompletionFunctionsCacheUpdated = $true
+            $script:WslCompletionFunctionsCacheUpdated = $true
         }
     }
-    if ($WslCompletionFunctionsCacheUpdated) {
-        New-Item $WslCompletionFunctionsCache -Force | Out-Null
-        $global:WslCompletionFunctions | Export-Clixml $WslCompletionFunctionsCache
+    if ($script:WslCompletionFunctionsCacheUpdated) {
+        New-Item $script:WslCompletionFunctionsCache -Force | Out-Null
+        $global:WslCompletionFunctions | Export-Clixml $script:WslCompletionFunctionsCache
     }
     
     # Register an ArgumentCompleter that shims bash's programmable completion.
