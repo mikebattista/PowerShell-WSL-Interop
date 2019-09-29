@@ -50,34 +50,8 @@ function global:Import-WslCommand() {
         [string[]]$Command
     )
 
-    # Register a function for each command.
-    $Command | ForEach-Object { Invoke-Expression @"
-    Remove-Alias $_ -Force -ErrorAction Ignore
-    function global:$_() {
-        for (`$i = 0; `$i -lt `$args.Count; `$i++) {
-            if (`$null -eq `$args[`$i]) {
-                continue
-            }
-
-            # If a path is absolute with a qualifier (e.g. C:), run it through wslpath to map it to the appropriate mount point.
-            if (Split-Path `$args[`$i] -IsAbsolute -ErrorAction Ignore) {
-                `$args[`$i] = Format-WslArgument (wsl.exe wslpath (`$args[`$i] -replace "\\", "/"))
-            # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
-            } elseif (Test-Path `$args[`$i] -ErrorAction Ignore) {
-                `$args[`$i] = Format-WslArgument (`$args[`$i] -replace "\\", "/")
-            }
-        }
-
-        `$defaultArgs = ((`$WslDefaultParameterValues.'$_' -split ' '), "")[`$WslDefaultParameterValues.Disabled -eq `$true]
-        if (`$input.MoveNext()) {
-            `$input.Reset()
-            `$input | wsl.exe $_ `$defaultArgs (`$args -split ' ')
-        } else {
-            wsl.exe $_ `$defaultArgs (`$args -split ' ')
-        }
-    }
-"@
-    }
+    # Register an alias for each command.
+    $Command | ForEach-Object { Set-Alias $_ Invoke-WslCommand -Scope Global -Force }
     
     # Map the commands to the appropriate bash completion functions.
     $script:WslCompletionFunctionsCache = "$Env:APPDATA\PowerShell WSL Interop\WslCompletionFunctions"
@@ -190,14 +164,47 @@ function global:Import-WslCommand() {
             [System.Management.Automation.CompletionResult]::new($completionText, $listItemText, 'ParameterName', $completionText)
         }
     }
+}
 
-    # Helper function to escape characters in arguments passed to WSL that would otherwise be misinterpreted.
-    function global:Format-WslArgument([string]$arg, [bool]$interactive) {
-        $arg = $arg.Trim()
-        if ($interactive -and $arg.Contains(" ")) {
-            return "'$arg'"
-        } else {
-            return ($arg -replace " ", "\ ") -replace "([()|])", ('\$1', '`$1')[$interactive]
+function global:Invoke-WslCommand() {
+    <#
+    .SYNOPSIS
+    The base function for command aliases imported with Import-WslCommand.
+    #>
+
+    for ($i = 0; $i -lt $args.Count; $i++) {
+        if ($null -eq $args[$i]) {
+            continue
         }
+
+        # If a path is absolute with a qualifier (e.g. C:), run it through wslpath to map it to the appropriate mount point.
+        if (Split-Path $args[$i] -IsAbsolute -ErrorAction Ignore) {
+            $args[$i] = Format-WslArgument (wsl.exe wslpath ($args[$i] -replace "\\", "/"))
+        # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
+        } elseif (Test-Path $args[$i] -ErrorAction Ignore) {
+            $args[$i] = Format-WslArgument ($args[$i] -replace "\\", "/")
+        }
+    }
+
+    $defaultArgs = (($WslDefaultParameterValues."$($MyInvocation.InvocationName)" -split ' '), "")[$WslDefaultParameterValues.Disabled -eq $true]
+    if ($input.MoveNext()) {
+        $input.Reset()
+        $input | wsl.exe $MyInvocation.InvocationName $defaultArgs ($args -split ' ')
+    } else {
+        wsl.exe $MyInvocation.InvocationName $defaultArgs ($args -split ' ')
+    }
+}
+
+function global:Format-WslArgument([string]$arg, [bool]$interactive) {
+    <#
+    .SYNOPSIS
+    Format arguments passed to WSL to prevent them from being misinterpreted.
+    #>
+
+    $arg = $arg.Trim()
+    if ($interactive -and $arg.Contains(" ")) {
+        return "'$arg'"
+    } else {
+        return ($arg -replace " ", "\ ") -replace "([()|])", ('\$1', '`$1')[$interactive]
     }
 }
