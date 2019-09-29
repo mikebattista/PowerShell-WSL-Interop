@@ -38,10 +38,6 @@ The import of these functions replaces any PowerShell aliases that conflict with
 * Install [PowerShell Core](https://github.com/powershell/powershell#get-powershell)
 * Install the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 * Add the contents of [PowerShell WSL Interop.ps1](https://github.com/mikebattista/PowerShell-WSL-Interop/blob/master/PowerShell%20WSL%20Interop.ps1) to your [PowerShell profile](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-6) then call `Import-WslCommand` with a list of commands to import (e.g. `Import-WslCommand "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"`) either from your profile for persistent access or on demand when you need a command
-* (Optionally) Update the `$F` switch within `Import-WslCommand` to map the commands to the bash completion functions returned by `complete | grep <COMMAND>$` within bash (e.g. `complete -F _longopt less` means bash uses the `_longopt` function to complete for `less`)
-    * Note: If you omit this step, the imported commands will resolve Linux file paths but not arguments
-    * Note: bash loads shell completion functions on demand for many commands so you may need to attempt argument completion within bash first for a given command before `complete` will return its completion spec
-    * (BETA): If you take code from [this branch](https://github.com/mikebattista/PowerShell-WSL-Interop/tree/mikebattista/bash-completion-functions) you can try out a build that will automatically identify bash completion functions
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslDefaultParameterValues` and set default arguments for commands using the pattern `$WslDefaultParameterValues["<COMMAND>"] = "<ARGS>"`
 
 ## Known Issues
