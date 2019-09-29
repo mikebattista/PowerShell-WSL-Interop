@@ -92,10 +92,10 @@ function global:Import-WslCommand() {
     $Command | ForEach-Object {
         if (-not $global:WslCompletionFunctions.Contains($_)) {
             # Try to find the completion function.
-            $global:WslCompletionFunctions[$_] = wsl.exe ('grep -Phoz ''\bcomplete\b\N*-F ([^ ]+)(\N*\\\n)*\N*\s*' + $_ + '\s+'' /usr/share/bash-completion/completions/' + $_ + ' /usr/share/bash-completion/bash_completion 2> /dev/null | sed -Ez ''s/\bcomplete\b.*-F ([^ ]+).*/\1/''' -split ' ')
+            $global:WslCompletionFunctions[$_] = wsl.exe (". /usr/share/bash-completion/bash_completion 2> /dev/null; . /usr/share/bash-completion/completions/$_ 2> /dev/null; complete | grep -E '\b$([regex]::Escape($_))`$' | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'" -split ' ')
             
             # If we can't find a completion function, default to _minimal which will resolve Linux file paths.
-            if ($null -eq $global:WslCompletionFunctions[$_]) {
+            if ($null -eq $global:WslCompletionFunctions[$_] -or $global:WslCompletionFunctions[$_] -like "complete*") {
                 $global:WslCompletionFunctions[$_] = "_minimal"
             }
             
@@ -193,6 +193,7 @@ function global:Import-WslCommand() {
 
     # Helper function to escape characters in arguments passed to WSL that would otherwise be misinterpreted.
     function global:Format-WslArgument([string]$arg, [bool]$interactive) {
+        $arg = $arg.Trim()
         if ($interactive -and $arg.Contains(" ")) {
             return "'$arg'"
         } else {
