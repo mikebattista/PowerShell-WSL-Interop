@@ -92,7 +92,7 @@ function global:Import-WslCommand() {
     $Command | ForEach-Object {
         if (-not $global:WslCompletionFunctions.Contains($_)) {
             # Try to find the completion function.
-            $global:WslCompletionFunctions[$_] = wsl.exe (". /usr/share/bash-completion/bash_completion 2> /dev/null; . /usr/share/bash-completion/completions/$_ 2> /dev/null; complete | grep -E '\b$([regex]::Escape($_))`$' | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'" -split ' ')
+            $global:WslCompletionFunctions[$_] = wsl.exe (". /usr/share/bash-completion/bash_completion 2> /dev/null; . /usr/share/bash-completion/completions/$_ 2> /dev/null; complete -p $_ 2> /dev/null | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'" -split ' ')
             
             # If we can't find a completion function, default to _minimal which will resolve Linux file paths.
             if ($null -eq $global:WslCompletionFunctions[$_] -or $global:WslCompletionFunctions[$_] -like "complete*") {
