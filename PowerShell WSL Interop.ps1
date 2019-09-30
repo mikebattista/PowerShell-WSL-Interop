@@ -172,7 +172,7 @@ function global:Invoke-WslCommand() {
     # Identify the command.
     $command = $MyInvocation.InvocationName
     if ($command -eq '&') {
-        $MyInvocation.Line -match '&\s+(["''$]?[^ ]+["'']?)'
+        $MyInvocation.Line -match '&\s+(["''$]?[^ ]+["'']?)' | Out-Null
         if ($Matches[1] -like '$*') {
             $command = $ExecutionContext.InvokeCommand.ExpandString($Matches[1])
         } else {
