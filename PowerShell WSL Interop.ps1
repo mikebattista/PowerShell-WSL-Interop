@@ -98,9 +98,6 @@ function global:Import-WslCommand() {
             if ($null -eq $global:WslCompletionFunctions[$_] -or $global:WslCompletionFunctions[$_] -like "complete*") {
                 $global:WslCompletionFunctions[$_] = "_minimal"
             }
-            
-            # Remove null terminator characters which will break our calls to WSL and select the first completion function if multiple were returned which will be more specific.
-            $global:WslCompletionFunctions[$_] = ($global:WslCompletionFunctions[$_] -split [char]0)[0]
 
             # Set the cache updated flag.
             $script:WslCompletionFunctionsCacheUpdated = $true
