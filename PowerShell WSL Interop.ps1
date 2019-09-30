@@ -172,6 +172,18 @@ function global:Invoke-WslCommand() {
     The base function for command aliases imported with Import-WslCommand.
     #>
 
+    # Identify the command.
+    $command = $MyInvocation.InvocationName
+    if ($command -eq '&') {
+        $MyInvocation.Line -match '&\s+(["''$]?[^ ]+["'']?)'
+        if ($Matches[1] -like '$*') {
+            $command = $ExecutionContext.InvokeCommand.ExpandString($Matches[1])
+        } else {
+            $command = $Matches[1]
+        }
+    }
+
+    # Translate path arguments.
     for ($i = 0; $i -lt $args.Count; $i++) {
         if ($null -eq $args[$i]) {
             continue
@@ -186,12 +198,13 @@ function global:Invoke-WslCommand() {
         }
     }
 
-    $defaultArgs = (($WslDefaultParameterValues."$($MyInvocation.InvocationName)" -split ' '), "")[$WslDefaultParameterValues.Disabled -eq $true]
+    # Invoke the command.
+    $defaultArgs = (($WslDefaultParameterValues."$command" -split ' '), "")[$WslDefaultParameterValues.Disabled -eq $true]
     if ($input.MoveNext()) {
         $input.Reset()
-        $input | wsl.exe $MyInvocation.InvocationName $defaultArgs ($args -split ' ')
+        $input | wsl.exe $command $defaultArgs ($args -split ' ')
     } else {
-        wsl.exe $MyInvocation.InvocationName $defaultArgs ($args -split ' ')
+        wsl.exe $command $defaultArgs ($args -split ' ')
     }
 }
 
