@@ -66,7 +66,7 @@ function global:Import-WslCommand() {
     $Command | ForEach-Object {
         if (-not $global:WslCompletionFunctions.Contains($_)) {
             # Try to find the completion function.
-            $global:WslCompletionFunctions[$_] = wsl.exe (". /usr/share/bash-completion/bash_completion 2> /dev/null; . /usr/share/bash-completion/completions/$_ 2> /dev/null; complete -p $_ 2> /dev/null | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'" -split ' ')
+            $global:WslCompletionFunctions[$_] = wsl.exe (". /usr/share/bash-completion/bash_completion 2> /dev/null; . /usr/share/bash-completion/completions/$_ 2> /dev/null; __load_completion $_ 2> /dev/null; complete -p $_ 2> /dev/null | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'" -split ' ')
             
             # If we can't find a completion function, default to _minimal which will resolve Linux file paths.
             if ($null -eq $global:WslCompletionFunctions[$_] -or $global:WslCompletionFunctions[$_] -like "complete*") {
@@ -129,7 +129,7 @@ function global:Import-WslCommand() {
         # Build the command to pass to WSL.
         $command = $commandAst.CommandElements[0].Value
         $bashCompletion = ". /usr/share/bash-completion/bash_completion 2> /dev/null"
-        $commandCompletion = ". /usr/share/bash-completion/completions/$command 2> /dev/null"
+        $commandCompletion = ". /usr/share/bash-completion/completions/$command 2> /dev/null; __load_completion $_ 2> /dev/null"
         $COMPINPUT = "COMP_LINE=$COMP_LINE; COMP_WORDS=$COMP_WORDS; COMP_CWORD=$COMP_CWORD; COMP_POINT=$cursorPosition"
         $COMPGEN = "bind `"set completion-ignore-case on`" 2> /dev/null; $($WslCompletionFunctions[$command]) `"$command`" `"$wordToComplete`" `"$previousWord`" 2> /dev/null"
         $COMPREPLY = "IFS=`$'\n'; echo `"`${COMPREPLY[*]}`""
