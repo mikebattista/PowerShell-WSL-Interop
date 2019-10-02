@@ -50,42 +50,68 @@ function global:Import-WslCommand() {
         [string[]]$Command
     )
 
-    # Register an alias for each command.
-    $Command | ForEach-Object { Set-Alias $_ Invoke-WslCommand -Scope Global -Force }
-    
-    # Map the commands to the appropriate bash completion functions.
-    $script:WslCompletionFunctionsCache = "$Env:APPDATA\PowerShell WSL Interop\WslCompletionFunctions"
-    $script:WslCompletionFunctionsCacheUpdated = $false
-    if ($null -eq $global:WslCompletionFunctions) {
-        if (Test-Path $script:WslCompletionFunctionsCache) {
-            $global:WslCompletionFunctions = Import-Clixml $script:WslCompletionFunctionsCache
-        } else {
-            $global:WslCompletionFunctions = @{}
-        }
-    }
-    $Command | ForEach-Object {
-        if (-not $global:WslCompletionFunctions.Contains($_)) {
-            # Try to find the completion function.
-            $global:WslCompletionFunctions[$_] = wsl.exe (". /usr/share/bash-completion/bash_completion 2> /dev/null; __load_completion $_ 2> /dev/null; complete -p $_ 2> /dev/null | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'" -split ' ')
-            
-            # If we can't find a completion function, default to _minimal which will resolve Linux file paths.
-            if ($null -eq $global:WslCompletionFunctions[$_] -or $global:WslCompletionFunctions[$_] -like "complete*") {
-                $global:WslCompletionFunctions[$_] = "_minimal"
+    # Register a function for each command.
+    $Command | ForEach-Object { Invoke-Expression @"
+    Remove-Alias $_ -Scope Global -Force -ErrorAction Ignore
+    function global:$_() {
+        # Translate path arguments.
+        for (`$i = 0; `$i -lt `$args.Count; `$i++) {
+            if (`$null -eq `$args[`$i]) {
+                continue
             }
 
-            # Set the cache updated flag.
-            $script:WslCompletionFunctionsCacheUpdated = $true
+            # If a path is absolute with a qualifier (e.g. C:), run it through wslpath to map it to the appropriate mount point.
+            if (Split-Path `$args[`$i] -IsAbsolute -ErrorAction Ignore) {
+                `$args[`$i] = Format-WslArgument (wsl.exe wslpath (`$args[`$i] -replace "\\", "/"))
+            # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
+            } elseif (Test-Path `$args[`$i] -ErrorAction Ignore) {
+                `$args[`$i] = Format-WslArgument (`$args[`$i] -replace "\\", "/")
+            }
+        }
+
+        # Invoke the command.
+        `$defaultArgs = ((`$WslDefaultParameterValues."$_" -split ' '), "")[`$WslDefaultParameterValues.Disabled -eq `$true]
+        if (`$input.MoveNext()) {
+            `$input.Reset()
+            `$input | wsl.exe $_ `$defaultArgs (`$args -split ' ')
+        } else {
+            wsl.exe $_ `$defaultArgs (`$args -split ' ')
         }
     }
-    if ($script:WslCompletionFunctionsCacheUpdated) {
-        New-Item $script:WslCompletionFunctionsCache -Force | Out-Null
-        $global:WslCompletionFunctions | Export-Clixml $script:WslCompletionFunctionsCache
+"@
     }
     
     # Register an ArgumentCompleter that shims bash's programmable completion.
     Register-ArgumentCompleter -CommandName $Command -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
         
+        # Identify the command.
+        $command = $commandAst.CommandElements[0].Value
+
+        # Initialize the bash completion function cache.
+        $WslCompletionFunctionsCache = "$Env:APPDATA\PowerShell WSL Interop\WslCompletionFunctions"
+        if ($null -eq $global:WslCompletionFunctions) {
+            if (Test-Path $WslCompletionFunctionsCache) {
+                $global:WslCompletionFunctions = Import-Clixml $WslCompletionFunctionsCache
+            } else {
+                $global:WslCompletionFunctions = @{}
+            }
+        }
+
+        # Map the command to the appropriate bash completion function.
+        if (-not $global:WslCompletionFunctions.Contains($command)) {
+            # Try to find the completion function.
+            $global:WslCompletionFunctions[$command] = wsl.exe (". /usr/share/bash-completion/bash_completion 2> /dev/null; __load_completion $command 2> /dev/null; complete -p $command 2> /dev/null | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'" -split ' ')
+            
+            # If we can't find a completion function, default to _minimal which will resolve Linux file paths.
+            if ($null -eq $global:WslCompletionFunctions[$command] -or $global:WslCompletionFunctions[$command] -like "complete*") {
+                $global:WslCompletionFunctions[$command] = "_minimal"
+            }
+
+            New-Item $WslCompletionFunctionsCache -Force | Out-Null
+            $global:WslCompletionFunctions | Export-Clixml $WslCompletionFunctionsCache
+        }
+
         # Populate bash programmable completion variables.
         $COMP_LINE = "`"$commandAst`""
         $COMP_WORDS = "('$($commandAst.CommandElements.Extent.Text -join "' '")')" -replace "''", "'"
@@ -127,7 +153,6 @@ function global:Import-WslCommand() {
         }
 
         # Build the command to pass to WSL.
-        $command = $commandAst.CommandElements[0].Value
         $bashCompletion = ". /usr/share/bash-completion/bash_completion 2> /dev/null"
         $commandCompletion = "__load_completion $command 2> /dev/null"
         $COMPINPUT = "COMP_LINE=$COMP_LINE; COMP_WORDS=$COMP_WORDS; COMP_CWORD=$COMP_CWORD; COMP_POINT=$cursorPosition"
@@ -160,48 +185,6 @@ function global:Import-WslCommand() {
             $previousCompletionText = $completionText
             [System.Management.Automation.CompletionResult]::new($completionText, $listItemText, 'ParameterName', $completionText)
         }
-    }
-}
-
-function global:Invoke-WslCommand() {
-    <#
-    .SYNOPSIS
-    The base function for command aliases imported with Import-WslCommand.
-    #>
-
-    # Identify the command.
-    $command = $MyInvocation.InvocationName
-    if ($command -eq '&') {
-        $MyInvocation.Line -match '&\s+(["''$]?[^ ]+["'']?)' | Out-Null
-        if ($Matches[1] -like '$*') {
-            $command = $ExecutionContext.InvokeCommand.ExpandString($Matches[1])
-        } else {
-            $command = $Matches[1]
-        }
-    }
-
-    # Translate path arguments.
-    for ($i = 0; $i -lt $args.Count; $i++) {
-        if ($null -eq $args[$i]) {
-            continue
-        }
-
-        # If a path is absolute with a qualifier (e.g. C:), run it through wslpath to map it to the appropriate mount point.
-        if (Split-Path $args[$i] -IsAbsolute -ErrorAction Ignore) {
-            $args[$i] = Format-WslArgument (wsl.exe wslpath ($args[$i] -replace "\\", "/"))
-        # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
-        } elseif (Test-Path $args[$i] -ErrorAction Ignore) {
-            $args[$i] = Format-WslArgument ($args[$i] -replace "\\", "/")
-        }
-    }
-
-    # Invoke the command.
-    $defaultArgs = (($WslDefaultParameterValues."$command" -split ' '), "")[$WslDefaultParameterValues.Disabled -eq $true]
-    if ($input.MoveNext()) {
-        $input.Reset()
-        $input | wsl.exe $command $defaultArgs ($args -split ' ')
-    } else {
-        wsl.exe $command $defaultArgs ($args -split ' ')
     }
 }
 
