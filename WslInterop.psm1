@@ -108,6 +108,7 @@ function global:Import-WslCommand() {
                 $global:WslCompletionFunctions[$command] = "_minimal"
             }
 
+            # Update the bash completion function cache.
             New-Item $WslCompletionFunctionsCache -Force | Out-Null
             $global:WslCompletionFunctions | Export-Clixml $WslCompletionFunctionsCache
         }
