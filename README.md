@@ -37,9 +37,9 @@ The import of these functions replaces any PowerShell aliases that conflict with
 
 * Install [PowerShell Core](https://github.com/powershell/powershell#get-powershell)
 * Install the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
-* Install the module via `Install-Module WslInterop` then call `Import-WslCommand` with a list of commands to import (e.g. `Import-WslCommand "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"`) either from your profile for persistent access or on demand when you need a command
+* Install the WslInterop module with  `Install-Module WslInterop`
+* Import commands with `Import-WslCommand` either from your profile for persistent access or on demand when you need a command (e.g. `Import-WslCommand "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"`)
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslDefaultParameterValues` and set default arguments for commands using the pattern `$WslDefaultParameterValues["<COMMAND>"] = "<ARGS>"`
-* Note: Import-WslCommand automatically detects the right bash completion function to use to provide argument completion for a command and then caches the mapping. There is a performance penalty to generate the cache the first time a set of commands is imported, but subsequent imports will not incur this penalty.
 
 ## Known Issues
 
