@@ -42,9 +42,9 @@ function global:Import-WslCommand() {
 
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [string[]]$Command
+        [string[]] $Command
     )
 
     # Register a function for each command.
