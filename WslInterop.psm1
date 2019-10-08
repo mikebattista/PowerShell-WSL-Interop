@@ -44,13 +44,13 @@ function global:Import-WslCommand{
     Param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [string[]] $Command
+        [string[]] $Commands
     )
 
     # Register a function for each command.
-    $Command | ForEach-Object { Invoke-Expression @"
-    Remove-Alias $_ -Scope Global -Force -ErrorAction Ignore
-    function global:$_() {
+    foreach($command in $Commands){Invoke-Expression @"
+    Remove-Alias $command -Scope Global -Force -ErrorAction Ignore
+    function global:$command() {
         # Translate path arguments.
         for (`$i = 0; `$i -lt `$args.Count; `$i++) {
             if (`$null -eq `$args[`$i]) {
@@ -67,19 +67,19 @@ function global:Import-WslCommand{
         }
 
         # Invoke the command.
-        `$defaultArgs = ((`$WslDefaultParameterValues."$_" -split ' '), "")[`$WslDefaultParameterValues.Disabled -eq `$true]
+        `$defaultArgs = ((`$WslDefaultParameterValues."$command" -split ' '), "")[`$WslDefaultParameterValues.Disabled -eq `$true]
         if (`$input.MoveNext()) {
             `$input.Reset()
-            `$input | wsl.exe $_ `$defaultArgs (`$args -split ' ')
+            `$input | wsl.exe $command `$defaultArgs (`$args -split ' ')
         } else {
-            wsl.exe $_ `$defaultArgs (`$args -split ' ')
+            wsl.exe $command `$defaultArgs (`$args -split ' ')
         }
     }
 "@
     }
     
     # Register an ArgumentCompleter that shims bash's programmable completion.
-    Register-ArgumentCompleter -CommandName $Command -ScriptBlock {
+    Register-ArgumentCompleter -CommandName $Commands -ScriptBlock {
         param($wordToComplete, $commandAst, $cursorPosition)
         
         # Identify the command.
