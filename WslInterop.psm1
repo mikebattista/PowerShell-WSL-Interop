@@ -186,11 +186,15 @@ function global:Import-WslCommand() {
     }
 }
 
-function global:Format-WslArgument([string]$arg, [bool]$interactive) {
+function global:Format-WslArgument{
     <#
     .SYNOPSIS
         Format arguments passed to WSL to prevent them from being misinterpreted.
     #>
+    param(
+        [string] $arg, 
+        [bool]   $interactive
+    )
 
     $arg = $arg.Trim()
     if ($interactive -and $arg.Contains(" ")) {
