@@ -189,7 +189,7 @@ function global:Import-WslCommand() {
 function global:Format-WslArgument([string]$arg, [bool]$interactive) {
     <#
     .SYNOPSIS
-    Format arguments passed to WSL to prevent them from being misinterpreted.
+        Format arguments passed to WSL to prevent them from being misinterpreted.
     #>
 
     $arg = $arg.Trim()
