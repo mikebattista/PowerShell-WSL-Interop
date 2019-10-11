@@ -66,6 +66,9 @@ function global:Import-WslCommand() {
             # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
             } elseif (Test-Path `$args[`$i] -ErrorAction Ignore) {
                 `$args[`$i] = Format-WslArgument (`$args[`$i] -replace "\\", "/")
+            # Otherwise, format special characters.
+            } else {
+                `$args[`$i] = Format-WslArgument `$args[`$i]
             }
         }
 
@@ -199,6 +202,6 @@ function global:Format-WslArgument([string]$arg, [bool]$interactive) {
     if ($interactive -and $arg.Contains(" ")) {
         return "'$arg'"
     } else {
-        return ($arg -replace " ", "\ ") -replace "([()|])", ('\$1', '`$1')[$interactive]
+        return $arg -replace "([ ()\\|;])", ('\$1', '`$1')[$interactive]
     }
 }
