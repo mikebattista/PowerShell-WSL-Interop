@@ -72,13 +72,17 @@ function global:Import-WslCommand() {
             }
         }
 
+        # Build the command to pass to WSL.
+        `$defaultArgs = (`$WslDefaultParameterValues."$_", "")[`$WslDefaultParameterValues.Disabled -eq `$true]
+        `$environmentVariables = (((`$WslEnvironmentVariables.Keys | ForEach-Object { "`$_='`$(`$WslEnvironmentVariables.""`$_"")'" }) -join ' '), "")[`$WslEnvironmentVariables.Count -eq 0]
+        `$commandLine = "`$environmentVariables $_ `$defaultArgs `$args" -split ' '
+
         # Invoke the command.
-        `$defaultArgs = ((`$WslDefaultParameterValues."$_" -split ' '), "")[`$WslDefaultParameterValues.Disabled -eq `$true]
         if (`$input.MoveNext()) {
             `$input.Reset()
-            `$input | wsl.exe $_ `$defaultArgs (`$args -split ' ')
+            `$input | wsl.exe `$commandLine
         } else {
-            wsl.exe $_ `$defaultArgs (`$args -split ' ')
+            wsl.exe `$commandLine
         }
     }
 "@
