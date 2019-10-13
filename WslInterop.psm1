@@ -73,8 +73,8 @@ function global:Import-WslCommand() {
         }
 
         # Build the command to pass to WSL.
+        `$environmentVariables = (((`$WslEnvironmentVariables.Keys | ForEach-Object { "`$_='`$(`$WslEnvironmentVariables."`$_")'" }) -join ' '), "")[`$WslEnvironmentVariables.Count -eq 0]
         `$defaultArgs = (`$WslDefaultParameterValues."$_", "")[`$WslDefaultParameterValues.Disabled -eq `$true]
-        `$environmentVariables = (((`$WslEnvironmentVariables.Keys | ForEach-Object { "`$_='`$(`$WslEnvironmentVariables.""`$_"")'" }) -join ' '), "")[`$WslEnvironmentVariables.Count -eq 0]
         `$commandLine = "`$environmentVariables $_ `$defaultArgs `$args" -split ' '
 
         # Invoke the command.
