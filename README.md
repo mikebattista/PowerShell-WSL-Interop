@@ -15,6 +15,7 @@ The `Import-WslCommand` function addresses these issues in the following ways:
 * By creating PowerShell function wrappers for commands, prefixing them with `wsl` is no longer necessary
 * By identifying path arguments and converting them to WSL paths, path resolution is natural and intuitive as it translates seamlessly between Windows and WSL paths
 * Default parameters are supported by `$WslDefaultParameterValues` similar to `$PSDefaultParameterValues`
+* Environment variables are supported by `$WslEnvironmentVariables`
 * Command completion is enabled by PowerShell's command completion
 * Argument completion is enabled by registering an `ArgumentCompleter` that shims bash's programmable completion
 
@@ -31,6 +32,8 @@ $WslDefaultParameterValues["ls"] = "-AFh --group-directories-first"
 If you use aliases or environment variables within your login profiles to set default parameters for commands, define a hash table called `$WslDefaultParameterValues` within
 your PowerShell profile and populate it as above for a similar experience.
 
+Environment variables can also be set in a hash table called `$WslEnvironmentVariables` using the pattern `$WslEnvironmentVariables["<NAME>"] = "<VALUE>"`.
+
 The import of these functions replaces any PowerShell aliases that conflict with the commands.
 
 ## Usage
@@ -40,6 +43,7 @@ The import of these functions replaces any PowerShell aliases that conflict with
 * Install the WslInterop module with  `Install-Module WslInterop`
 * Import commands with `Import-WslCommand` either from your profile for persistent access or on demand when you need a command (e.g. `Import-WslCommand "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"`)
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslDefaultParameterValues` and set default arguments for commands using the pattern `$WslDefaultParameterValues["<COMMAND>"] = "<ARGS>"`
+* (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslEnvironmentVariables` and set environment variables using the pattern `$WslEnvironmentVariables["<NAME>"] = "<VALUE>"`
 
 ## Known Issues
 
