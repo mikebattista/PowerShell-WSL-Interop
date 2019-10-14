@@ -1,5 +1,30 @@
 Import-Module .\WslInterop.psd1 -Force
 
+Describe "Import-WslCommand" {
+    It "Creates a function wrapper for <Command> and removes any conflicting aliases." -TestCases @(
+        @{command = 'awk'},
+        @{command = 'emacs'},
+        @{command = 'grep'},
+        @{command = 'head'},
+        @{command = 'less'},
+        @{command = 'ls'},
+        @{command = 'man'},
+        @{command = 'sed'},
+        @{command = 'seq'},
+        @{command = 'ssh'},
+        @{command = 'tail'},
+        @{command = 'vim'}
+    ) {
+        param([string]$command)
+
+        Set-Alias $command help -Scope Global -Force -ErrorAction Ignore
+
+        Import-WslCommand $command
+
+        Get-Command $command | Select-Object -ExpandProperty CommandType | Should -BeExactly "Function"
+    }
+}
+
 Describe "Format-WslArgument" {
     It "Escapes special characters in <arg> when interactive is <interactive>." -TestCases @(
         @{arg = '/mnt/c/Windows'; interactive = $true; expectedResult = '/mnt/c/Windows'}
