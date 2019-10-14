@@ -206,12 +206,14 @@ function global:Format-WslArgument([string]$arg, [bool]$interactive) {
     #>
 
     $arg = $arg.Trim()
-    
-    if ($interactive -and $arg.Contains(" ")) {
+
+    if ($arg -like "[""']*[""']") {
+        return $arg
+    } elseif ($interactive -and $arg.Contains(" ")) {
         return "'$arg'"
     } else {
         $arg = $arg -replace "([ ()|;])", ('\$1', '`$1')[$interactive]
-        $arg = $arg -replace '(\\[abefnrtv])', '\$1'
+        $arg = $arg -replace '(\\[a-zA-Z0-9])', '\$1'
         return $arg
     }
 }
