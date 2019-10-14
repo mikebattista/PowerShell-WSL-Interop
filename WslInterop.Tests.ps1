@@ -35,6 +35,22 @@ Describe "Import-WslCommand" {
 
         & $command @arguments | Should -BeExactly $expectedResult
     }
+
+    It "Enables calling commands with default arguments." -TestCases @(
+        @{command = 'seq'; arguments = '0 10' -split ' '; expectedResult = '0-1-2-3-4-5-6-7-8-9-10'},
+        @{command = 'seq'; arguments = '0 2 10' -split ' '; expectedResult = '0-2-4-6-8-10'},
+        @{command = 'seq'; arguments = '-s : 0 2 10' -split ' '; expectedResult = '0:2:4:6:8:10'}
+    ) {
+        param([string]$command, [string[]]$arguments, [string]$expectedResult)
+
+        Import-WslCommand $command
+
+        Set-Variable WslDefaultParameterValues @{seq = "-s -"} -Scope Global
+
+        & $command @arguments | Should -BeExactly $expectedResult
+
+        Remove-Variable WslDefaultParameterValues -Scope Global
+    }
 }
 
 Describe "Format-WslArgument" {
