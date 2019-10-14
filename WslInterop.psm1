@@ -57,7 +57,7 @@ function global:Import-WslCommand() {
     $Command | ForEach-Object { Invoke-Expression @"
     Remove-Alias $_ -Scope Global -Force -ErrorAction Ignore
     function global:$_() {
-        # Translate path arguments.
+        # Translate path arguments and format special characters.
         for (`$i = 0; `$i -lt `$args.Count; `$i++) {
             if (`$null -eq `$args[`$i]) {
                 continue
