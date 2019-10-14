@@ -1,7 +1,7 @@
 Import-Module .\WslInterop.psd1 -Force
 
 Describe "Import-WslCommand" {
-    It "Creates a function wrapper for <Command> and removes any conflicting aliases." -TestCases @(
+    It "Creates a function wrapper for <command> and removes any conflicting aliases." -TestCases @(
         @{command = 'awk'},
         @{command = 'emacs'},
         @{command = 'grep'},
@@ -22,6 +22,18 @@ Describe "Import-WslCommand" {
         Import-WslCommand $command
 
         Get-Command $command | Select-Object -ExpandProperty CommandType | Should -BeExactly "Function"
+    }
+
+    It "Enables calling commands with arbitrary arguments." -TestCases @(
+        @{command = 'seq'; arguments = '0 10' -split ' '; expectedResult = '0 1 2 3 4 5 6 7 8 9 10' -split ' '},
+        @{command = 'seq'; arguments = '0 2 10' -split ' '; expectedResult = '0 2 4 6 8 10' -split ' '},
+        @{command = 'seq'; arguments = '-s - 0 2 10' -split ' '; expectedResult = '0-2-4-6-8-10' -split ' '}
+    ) {
+        param([string]$command, [string[]]$arguments, [string[]]$expectedResult)
+
+        Import-WslCommand $command
+
+        & $command @arguments | Should -BeExactly $expectedResult
     }
 }
 
