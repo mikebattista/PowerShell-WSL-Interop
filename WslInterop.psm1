@@ -63,8 +63,8 @@ function global:Import-WslCommand() {
                 continue
             }
 
-            # If a path is fully qualified (e.g. C:), run it through wslpath to map it to the appropriate mount point.
-            if ([System.IO.Path]::IsPathFullyQualified(`$args[`$i])) {
+            # If a path is fully qualified (e.g. C:) and not a UNC path, run it through wslpath to map it to the appropriate mount point.
+            if ([System.IO.Path]::IsPathFullyQualified(`$args[`$i]) -and -not `$args[`$i] -like '\\*') {
                 `$args[`$i] = Format-WslArgument (wsl.exe wslpath (`$args[`$i] -replace "\\", "/"))
             # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
             } elseif (Test-Path `$args[`$i] -ErrorAction Ignore) {
