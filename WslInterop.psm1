@@ -213,7 +213,7 @@ function global:Format-WslArgument([string]$arg, [bool]$interactive) {
         return "'$arg'"
     } else {
         $arg = $arg -replace "([ ,(){}|;])", ('\$1', '`$1')[$interactive]
-        $arg = $arg -replace '(\\[a-zA-Z0-9])', '\$1'
+        $arg = $arg -replace '(\\[a-zA-Z0-9.*+?^$])', '\$1'
         return $arg
     }
 }

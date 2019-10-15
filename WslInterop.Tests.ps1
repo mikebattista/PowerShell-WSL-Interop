@@ -95,6 +95,10 @@ Describe "Format-WslArgument" {
         @{arg = '[aeiou]{2,}'; interactive = $false; expectedResult = '[aeiou]\{2\,\}'}
         @{arg = '[[:digit:]]{2,}'; interactive = $true; expectedResult = '[[:digit:]]`{2`,`}'}
         @{arg = '[[:digit:]]{2,}'; interactive = $false; expectedResult = '[[:digit:]]\{2\,\}'}
+        @{arg = '^foo(.*?)bar$'; interactive = $true; expectedResult = '^foo`(.*?`)bar$'}
+        @{arg = '^foo(.*?)bar$'; interactive = $false; expectedResult = '^foo\(.*?\)bar$'}
+        @{arg = '\^foo\.\*\?bar\$'; interactive = $true; expectedResult = '\\^foo\\.\\*\\?bar\\$'}
+        @{arg = '\^foo\.\*\?bar\$'; interactive = $false; expectedResult = '\\^foo\\.\\*\\?bar\\$'}
         @{arg = '\a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z'; interactive = $true; expectedResult = '\\a\\b\\c\\d\\e\\f\\g\\h\\i\\j\\k\\l\\m\\n\\o\\p\\q\\r\\s\\t\\u\\v\\w\\x\\y\\z'}
         @{arg = '\a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z'; interactive = $false; expectedResult = '\\a\\b\\c\\d\\e\\f\\g\\h\\i\\j\\k\\l\\m\\n\\o\\p\\q\\r\\s\\t\\u\\v\\w\\x\\y\\z'}
         @{arg = '\A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z'; interactive = $true; expectedResult = '\\A\\B\\C\\D\\E\\F\\G\\H\\I\\J\\K\\L\\M\\N\\O\\P\\Q\\R\\S\\T\\U\\V\\W\\X\\Y\\Z'}
