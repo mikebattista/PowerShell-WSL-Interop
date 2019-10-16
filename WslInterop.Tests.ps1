@@ -58,6 +58,12 @@ Describe "Import-WslCommand" {
         @{command = 'ls'; arguments = 'C:\Win*'; failureResult = 'ls: cannot access ''C:Win*''*'},
         @{command = 'ls'; arguments = 'C:\Win*'; failureResult = 'ls: cannot access ''C:/Win*''*'},
         @{command = 'ls'; arguments = '/mnt/c/Program Files (x86)'; failureResult = 'ls: cannot access ''/mnt/c/Program''*'}
+        @{command = 'ls'; arguments = '.\.github'; failureResult = 'ls: cannot access ''..github''*'},
+        @{command = 'ls'; arguments = '.githu*'; failureResult = 'ls: cannot access ''.githu*''*'}
+        @{command = 'ls'; arguments = '.githu?'; failureResult = 'ls: cannot access ''.githu?''*'}
+        @{command = 'ls'; arguments = '.githu[abc]'; failureResult = 'ls: cannot access ''.githu[abc]''*'}
+        @{command = 'ls'; arguments = '.githu[a/b]'; failureResult = 'Test-Path : Cannot retrieve the dynamic parameters for the cmdlet. The specified wildcard character pattern is not valid*'}
+        @{command = 'ls'; arguments = '.githu[a\b]'; failureResult = 'Test-Path : Cannot retrieve the dynamic parameters for the cmdlet. The specified wildcard character pattern is not valid*'}
     ) {
         param([string]$command, [string[]]$arguments, [string]$failureResult)
 
@@ -93,13 +99,13 @@ Describe "Format-WslArgument" {
         @{arg = '/usr/share/bash-completion/bash_completion'; interactive = $false; expectedResult = '/usr/share/bash-completion/bash_completion'}
         @{arg = '/usr/share/bash-completion/bash_completion '; interactive = $true; expectedResult = '/usr/share/bash-completion/bash_completion'}
         @{arg = '/usr/share/bash-completion/bash_completion '; interactive = $false; expectedResult = '/usr/share/bash-completion/bash_completion'}
-        @{arg = 's/;/\n/g'; interactive = $true; expectedResult = 's/`;/\\n/g'}
+        @{arg = 's/;/\n/g'; interactive = $true; expectedResult = 's/`;/\n/g'}
         @{arg = 's/;/\n/g'; interactive = $false; expectedResult = 's/\;/\\n/g'}
         @{arg = '"s/;/\n/g"'; interactive = $true; expectedResult = '"s/;/\n/g"'}
         @{arg = '"s/;/\n/g"'; interactive = $false; expectedResult = '"s/;/\n/g"'}
         @{arg = '''s/;/\n/g'''; interactive = $true; expectedResult = '''s/;/\n/g'''}
         @{arg = '''s/;/\n/g'''; interactive = $false; expectedResult = '''s/;/\n/g'''}
-        @{arg = '^(a|b)\w+\1'; interactive = $true; expectedResult = '^`(a`|b`)\\w+\\1'}
+        @{arg = '^(a|b)\w+\1'; interactive = $true; expectedResult = '^`(a`|b`)\w+\1'}
         @{arg = '^(a|b)\w+\1'; interactive = $false; expectedResult = '^\(a\|b\)\\w+\\1'}
         @{arg = '"^(a|b)\w+\1"'; interactive = $true; expectedResult = '"^(a|b)\w+\1"'}
         @{arg = '"^(a|b)\w+\1"'; interactive = $false; expectedResult = '"^(a|b)\w+\1"'}
@@ -111,13 +117,21 @@ Describe "Format-WslArgument" {
         @{arg = '[[:digit:]]{2,}'; interactive = $false; expectedResult = '[[:digit:]]\{2\,\}'}
         @{arg = '^foo(.*?)bar$'; interactive = $true; expectedResult = '^foo`(.*?`)bar$'}
         @{arg = '^foo(.*?)bar$'; interactive = $false; expectedResult = '^foo\(.*?\)bar$'}
-        @{arg = '\^foo\.\*\?bar\$'; interactive = $true; expectedResult = '\\^foo\\.\\*\\?bar\\$'}
+        @{arg = '\^foo\.\*\?bar\$'; interactive = $true; expectedResult = '\^foo\.\*\?bar\$'}
         @{arg = '\^foo\.\*\?bar\$'; interactive = $false; expectedResult = '\\^foo\\.\\*\\?bar\\$'}
-        @{arg = '\a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z'; interactive = $true; expectedResult = '\\a\\b\\c\\d\\e\\f\\g\\h\\i\\j\\k\\l\\m\\n\\o\\p\\q\\r\\s\\t\\u\\v\\w\\x\\y\\z'}
+        @{arg = '\\\\\w'; interactive = $true; expectedResult = '\\\\\w'}
+        @{arg = '\\\\\w'; interactive = $false; expectedResult = '\\\\\\\\\\w'}
+        @{arg = '\\\\([^\\]+)'; interactive = $true; expectedResult = '\\\\`([^\\]+`)'}
+        @{arg = '\\\\([^\\]+)'; interactive = $false; expectedResult = '\\\\\\\\\([^\\\\]+\)'}
+        @{arg = '(\\\\[^\\]+)'; interactive = $true; expectedResult = '`(\\\\[^\\]+`)'}
+        @{arg = '(\\\\[^\\]+)'; interactive = $false; expectedResult = '\(\\\\\\\\[^\\\\]+\)'}
+        @{arg = '\(\)'; interactive = $true; expectedResult = '\`(\`)'}
+        @{arg = '\(\)'; interactive = $false; expectedResult = '\\\(\\\)'}
+        @{arg = '\a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z'; interactive = $true; expectedResult = '\a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z'}
         @{arg = '\a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z'; interactive = $false; expectedResult = '\\a\\b\\c\\d\\e\\f\\g\\h\\i\\j\\k\\l\\m\\n\\o\\p\\q\\r\\s\\t\\u\\v\\w\\x\\y\\z'}
-        @{arg = '\A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z'; interactive = $true; expectedResult = '\\A\\B\\C\\D\\E\\F\\G\\H\\I\\J\\K\\L\\M\\N\\O\\P\\Q\\R\\S\\T\\U\\V\\W\\X\\Y\\Z'}
+        @{arg = '\A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z'; interactive = $true; expectedResult = '\A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z'}
         @{arg = '\A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z'; interactive = $false; expectedResult = '\\A\\B\\C\\D\\E\\F\\G\\H\\I\\J\\K\\L\\M\\N\\O\\P\\Q\\R\\S\\T\\U\\V\\W\\X\\Y\\Z'}
-        @{arg = '\0\1\2\3\4\5\6\7\8\9'; interactive = $true; expectedResult = '\\0\\1\\2\\3\\4\\5\\6\\7\\8\\9'}
+        @{arg = '\0\1\2\3\4\5\6\7\8\9'; interactive = $true; expectedResult = '\0\1\2\3\4\5\6\7\8\9'}
         @{arg = '\0\1\2\3\4\5\6\7\8\9'; interactive = $false; expectedResult = '\\0\\1\\2\\3\\4\\5\\6\\7\\8\\9'}
     ) {
         param([string]$arg, [bool]$interactive, [string]$expectedResult)

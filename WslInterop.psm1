@@ -67,6 +67,15 @@ function global:Import-WslCommand() {
             if ([System.IO.Path]::IsPathFullyQualified(`$args[`$i]) -and -not (`$args[`$i] -like '\\*')) {
                 `$args[`$i] = Format-WslArgument (wsl.exe wslpath (`$args[`$i] -replace "\\", "/"))
             # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
+            # Avoid invalid wildcard pattern errors by using -LiteralPath for invalid patterns.
+            } elseif (`$args[`$i] -match '\[[^\[]*[/\\]') {
+                if (Test-Path -LiteralPath `$args[`$i] -ErrorAction Ignore) {
+                    `$args[`$i] = Format-WslArgument (`$args[`$i] -replace "\\", "/")
+                } else {
+                    `$args[`$i] = Format-WslArgument `$args[`$i]
+                }
+            # If a path is relative, the current working directory will be translated to an appropriate mount point, so just format it.
+            # The path doesn't contain an invalid wildcard pattern, so use -Path to support wildcards.
             } elseif (Test-Path `$args[`$i] -ErrorAction Ignore) {
                 `$args[`$i] = Format-WslArgument (`$args[`$i] -replace "\\", "/")
             # Otherwise, format special characters.
@@ -203,17 +212,34 @@ function global:Format-WslArgument([string]$arg, [bool]$interactive) {
     <#
     .SYNOPSIS
     Format arguments passed to WSL to prevent them from being misinterpreted.
+
+    Wrapping arguments in quotes can interfere with user intent for scenarios like 
+    pathname expansion and variable substitution, so instead just escape special characters,
+    optimizing for the most common scenarios (e.g. paths and regular expressions).
+
+    Automatic formatting can be bypassed by embedding quotes within arguments (e.g. "'s/;/\n/g'")
+    in which case the embedded quotes will be passed to WSL as part of the argument and standard
+    quoting rules will be applied.
     #>
 
     $arg = $arg.Trim()
 
     if ($arg -like "[""']*[""']") {
         return $arg
-    } elseif ($interactive -and $arg.Contains(" ")) {
-        return "'$arg'"
-    } else {
-        $arg = $arg -replace "([ ,(){}|&;])", ('\$1', '`$1')[$interactive]
-        $arg = $arg -replace '(\\[a-zA-Z0-9.*+?^$])', '\$1'
-        return $arg
     }
+    
+    if ($interactive) {
+        $arg = (($arg -replace '([ ,(){}|&;])', '`$1'), "'$arg'")[$arg.Contains(" ")]
+    } else {
+        $arg = $arg -replace '(\\\\|\\[ ,(){}|&;])', '\\$1'
+
+        while ($arg -match '([^\\](\\\\)*)([ ,(){}|&;])') {
+            $arg = $arg -replace '([^\\](\\\\)*)([ ,(){}|&;])', '$1\$3'
+        }
+        $arg = $arg -replace '^((\\\\)*)([ ,(){}|&;])', '$1\$3'
+
+        $arg = $arg -replace '(\\[a-zA-Z0-9.*+?^$])', '\$1'
+    }
+
+    return $arg
 }
