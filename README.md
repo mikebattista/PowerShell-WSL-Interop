@@ -43,7 +43,7 @@ The import of these functions replaces any PowerShell aliases that conflict with
 * Install the WslInterop module with  `Install-Module WslInterop`
 * Import commands with `Import-WslCommand` either from your profile for persistent access or on demand when you need a command (e.g. `Import-WslCommand "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"`)
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslDefaultParameterValues` and set default arguments for commands using the pattern `$WslDefaultParameterValues["<COMMAND>"] = "<ARGS>"`
-* (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslEnvironmentVariables` and set environment variables using the pattern `$WslEnvironmentVariables["<NAME>"] = "<VALUE>"`
+* (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslEnvironmentVariables` and set environment variables using the pattern `$WslEnvironmentVariables["<NAME>"] = "<VALUE>"` or use [WSLENV](https://devblogs.microsoft.com/commandline/share-environment-vars-between-wsl-and-windows/)
 
 ## Known Issues
 
