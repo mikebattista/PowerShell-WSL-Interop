@@ -54,6 +54,8 @@ Describe "Import-WslCommand" {
 
     It "Enables resolving Windows paths." -TestCases @(
         @{command = 'ls'; arguments = 'C:\Windows'; failureResult = 'ls: cannot access ''C:Windows''*'},
+        @{command = 'ls'; arguments = 'C:\Windows'; failureResult = 'ls: cannot access ''C:/Windows''*'},
+        @{command = 'ls'; arguments = 'C:\Win*'; failureResult = 'ls: cannot access ''C:Win*''*'},
         @{command = 'ls'; arguments = 'C:\Win*'; failureResult = 'ls: cannot access ''C:/Win*''*'},
         @{command = 'ls'; arguments = '/mnt/c/Program Files (x86)'; failureResult = 'ls: cannot access ''/mnt/c/Program''*'}
     ) {
