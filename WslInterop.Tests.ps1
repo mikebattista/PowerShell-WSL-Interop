@@ -1,7 +1,7 @@
 Import-Module .\WslInterop.psd1 -Force
 
 Describe "Import-WslCommand" {
-    It "Creates a function wrapper for <command> and removes any conflicting aliases." -TestCases @(
+    It "Creates function wrappers and removes any conflicting aliases." -TestCases @(
         @{command = 'awk'},
         @{command = 'emacs'},
         @{command = 'grep'},
@@ -50,6 +50,18 @@ Describe "Import-WslCommand" {
         & $command @arguments | Should -BeExactly $expectedResult
 
         Remove-Variable WslDefaultParameterValues -Scope Global
+    }
+
+    It "Enables resolving Windows paths." -TestCases @(
+        @{command = 'ls'; arguments = 'C:\Windows'; failureResult = 'ls: cannot access ''C:Windows''*'},
+        @{command = 'ls'; arguments = 'C:\Win*'; failureResult = 'ls: cannot access ''C:/Win*''*'},
+        @{command = 'ls'; arguments = '/mnt/c/Program Files (x86)'; failureResult = 'ls: cannot access ''/mnt/c/Program''*'}
+    ) {
+        param([string]$command, [string[]]$arguments, [string]$failureResult)
+
+        Import-WslCommand $command
+
+        & $command @arguments 2>&1 | Should -Not -BeLike $failureResult
     }
 }
 
