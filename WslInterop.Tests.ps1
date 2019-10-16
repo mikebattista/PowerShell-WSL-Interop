@@ -52,6 +52,20 @@ Describe "Import-WslCommand" {
         Remove-Variable WslDefaultParameterValues -Scope Global
     }
 
+    It "Enables calling commands that honor environment variables." -TestCases @(
+        @{command = 'grep'; arguments = 'input' -split ' '; expectedResult = '1'}
+    ) {
+        param([string]$command, [string[]]$arguments, [string]$expectedResult)
+
+        Import-WslCommand $command
+
+        Set-Variable WslEnvironmentVariables @{GREP_OPTIONS = "-c"} -Scope Global
+
+        "input" | & $command @arguments 2> $null | Should -BeExactly $expectedResult
+
+        Remove-Variable WslEnvironmentVariables -Scope Global
+    }
+
     It "Enables resolving Windows paths." -TestCases @(
         @{command = 'ls'; arguments = 'C:\Windows'; failureResult = 'ls: cannot access ''C:Windows''*'},
         @{command = 'ls'; arguments = 'C:\Windows'; failureResult = 'ls: cannot access ''C:/Windows''*'},
