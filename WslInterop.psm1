@@ -10,6 +10,7 @@ function global:Import-WslCommand() {
     * Prefixing commands with wsl is tedious and unnatural
     * Windows paths passed as arguments don't often resolve due to backslashes being interpreted as escape characters rather than directory separators
     * Windows paths passed as arguments don't often resolve due to not being translated to the appropriate mount point within WSL
+    * Arguments with special characters (e.g. regular expressions) are often misinterpreted without unnatural embedded quotes or escape sequences
     * Default parameters defined in WSL login profiles with aliases and environment variables aren’t honored
     * Linux path completion is not supported
     * Command completion is not supported
@@ -19,6 +20,7 @@ function global:Import-WslCommand() {
     
     * By creating PowerShell function wrappers for commands, prefixing them with wsl is no longer necessary
     * By identifying path arguments and converting them to WSL paths, path resolution is natural and intuitive as it translates seamlessly between Windows and WSL paths
+    * By formatting arguments with special characters, arguments like regular expressions can be provided naturally
     * Default parameters are supported by $WslDefaultParameterValues similar to $PSDefaultParameterValues
     * Environment variables are supported by $WslEnvironmentVariables
     * Command completion is enabled by PowerShell's command completion
