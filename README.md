@@ -42,8 +42,10 @@ The import of these functions replaces any PowerShell aliases that conflict with
 
 * Install [PowerShell Core](https://github.com/powershell/powershell#get-powershell)
 * Install the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+    * Note: Not all distributions include the `bash-completion` package required for argument completion (e.g. Debian). Ensure it is installed with `sudo apt install bash-completion`.
 * Install the WslInterop module with  `Install-Module WslInterop`
-* Import commands with `Import-WslCommand` either from your profile for persistent access or on demand when you need a command (e.g. `Import-WslCommand "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "tail", "vim"`)
+* Import commands with `Import-WslCommand`
+    * Note: An example command is `Import-WslCommand "apt", "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "sudo", "tail", "vim"`. Add this to your [profile](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles) for persistent access.
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslDefaultParameterValues` and set default arguments for commands using the pattern `$WslDefaultParameterValues["<COMMAND>"] = "<ARGS>"`
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslEnvironmentVariables` and set environment variables using the pattern `$WslEnvironmentVariables["<NAME>"] = "<VALUE>"` or use [WSLENV](https://devblogs.microsoft.com/commandline/share-environment-vars-between-wsl-and-windows/)
 
