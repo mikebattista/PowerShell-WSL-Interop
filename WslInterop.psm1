@@ -122,7 +122,7 @@ function global:Import-WslCommand() {
         # Map the command to the appropriate bash completion function.
         if (-not $global:WslCompletionFunctions.Contains($command)) {
             # Try to find the completion function.
-            $global:WslCompletionFunctions[$command] = wsl.exe (". /usr/share/bash-completion/bash_completion 2> /dev/null; __load_completion $command 2> /dev/null; complete -p $command 2> /dev/null | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'" -split ' ')
+            $global:WslCompletionFunctions[$command] = wsl.exe bash -c ". /usr/share/bash-completion/bash_completion 2> /dev/null; __load_completion $command 2> /dev/null; complete -p $command 2> /dev/null | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'"
             
             # If we can't find a completion function, default to _minimal which will resolve Linux file paths.
             if ($null -eq $global:WslCompletionFunctions[$command] -or $global:WslCompletionFunctions[$command] -like "complete*") {
@@ -180,11 +180,11 @@ function global:Import-WslCommand() {
         $COMPINPUT = "COMP_LINE=$COMP_LINE; COMP_WORDS=$COMP_WORDS; COMP_CWORD=$COMP_CWORD; COMP_POINT=$cursorPosition"
         $COMPGEN = "bind `"set completion-ignore-case on`" 2> /dev/null; $($WslCompletionFunctions[$command]) `"$command`" `"$wordToComplete`" `"$previousWord`" 2> /dev/null"
         $COMPREPLY = "IFS=`$'\n'; echo `"`${COMPREPLY[*]}`""
-        $commandLine = "$bashCompletion; $commandCompletion; $COMPINPUT; $COMPGEN; $COMPREPLY" -split ' '
+        $commandLine = "$bashCompletion; $commandCompletion; $COMPINPUT; $COMPGEN; $COMPREPLY"
 
         # Invoke bash completion and return CompletionResults.
         $previousCompletionText = ""
-        (wsl.exe $commandLine) -split '\n' |
+        ($commandLine | wsl.exe bash -s) -split '\n' |
         Sort-Object -Unique -CaseSensitive |
         ForEach-Object {
             if ($_ -eq "") {
