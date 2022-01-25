@@ -126,9 +126,17 @@ function global:Import-WslCommand() {
             # Try to find the completion function.
             $global:WslCompletionFunctions[$command] = wsl.exe bash -c ". /usr/share/bash-completion/bash_completion 2> /dev/null; __load_completion $command 2> /dev/null; complete -p $command 2> /dev/null | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'"
             
-            # If we can't find a completion function, default to _minimal which will resolve Linux file paths.
+            # If we can't find a completion function, resort to the default completion function.
             if ($null -eq $global:WslCompletionFunctions[$command] -or $global:WslCompletionFunctions[$command] -like "complete*") {
-                $global:WslCompletionFunctions[$command] = "_minimal"
+                $global:WslCompletionFunctions["-D"] = wsl.exe bash -c ". /usr/share/bash-completion/bash_completion 2> /dev/null; complete -p -D 2> /dev/null | sed -E 's/^complete.*-F ([^ ]+).*`$/\1/'"
+
+                # If the default completion function was overridden, use that.
+                if ($global:WslCompletionFunctions["-D"] -ne "_completion_loader") {
+                    $global:WslCompletionFunctions[$command] = $global:WslCompletionFunctions["-D"]
+                # Otherwise, resort to _minimal which will return Linux file paths.
+                } else {
+                    $global:WslCompletionFunctions[$command] = "_minimal"
+                }
             }
 
             # Update the bash completion function cache.
@@ -185,9 +193,17 @@ function global:Import-WslCommand() {
         $COMPREPLY = "IFS=`$'\n'; echo `"`${COMPREPLY[*]}`""
         $commandLine = "$bashCompletion; $commandCompletion; $COMPINPUT; $COMPGEN; $COMPREPLY"
 
-        # Invoke bash completion and return CompletionResults.
+        # Invoke bash completion.
+        $completions = ($commandLine | wsl.exe bash -s)
+        
+        # If no results were returned by an overridden default completion function, emulate `-o default` by resorting to _minimal.
+        if ($completions -eq "" -and $WslCompletionFunctions[$command] -eq $global:WslCompletionFunctions["-D"]) {
+            $completions = ($commandLine -replace $WslCompletionFunctions[$command], "_minimal" | wsl.exe bash -s)
+        }
+
+        # Return CompletionResults.
         $previousCompletionText = ""
-        ($commandLine | wsl.exe bash -s) -split '\n' |
+        $completions -split '\n' |
         Sort-Object -Unique -CaseSensitive |
         ForEach-Object {
             if ($_ -eq "") {
