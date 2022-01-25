@@ -91,6 +91,7 @@ function global:Import-WslCommand() {
         `$username = ("-u `$(`$WslDefaultParameterValues."-u")", "")[`$WslDefaultParameterValues."-u" -eq `$null]
         `$environmentVariables = ((`$WslEnvironmentVariables.Keys | ForEach-Object { "`$_='`$(`$WslEnvironmentVariables."`$_")'" }), "")[`$WslEnvironmentVariables.Count -eq 0]
         `$defaultArgs = (`$WslDefaultParameterValues."$_", "")[`$WslDefaultParameterValues.Disabled -eq `$true]
+        if (`$defaultArgs -is [scriptblock]) { `$defaultargs = . `$defaultargs }
         `$commandLine = "`$distribution `$username `$environmentVariables $_ `$defaultArgs `$args" -split ' '
 
         # Invoke the command.
