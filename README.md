@@ -48,6 +48,7 @@ The import of these functions replaces any PowerShell aliases that conflict with
     * Note: An example command is `Import-WslCommand "apt", "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "sudo", "tail", "vim"`. Add this to your [profile](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles) for persistent access.
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslDefaultParameterValues` and set default arguments for commands using the pattern `$WslDefaultParameterValues["<COMMAND>"] = "<ARGS>"`
     * Note: You can change the distribution `wsl` uses by setting `$WslDefaultParameterValues["-d"] = "<DISTRIBUTION>"`. This will set `wsl -d` when calling into `wsl`.
+    * Note: You can change the username `wsl` uses by setting `$WslDefaultParameterValues["-u"] = "<USERNAME>"`. This will set `wsl -u` when calling into `wsl`.
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslEnvironmentVariables` and set environment variables using the pattern `$WslEnvironmentVariables["<NAME>"] = "<VALUE>"` or use [WSLENV](https://devblogs.microsoft.com/commandline/share-environment-vars-between-wsl-and-windows/)
 
 ## Known Issues
