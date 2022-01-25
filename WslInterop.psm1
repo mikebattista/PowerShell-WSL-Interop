@@ -141,6 +141,7 @@ function global:Import-WslCommand() {
         $COMP_WORDS = "('$($commandAst.CommandElements.Extent.Text -join "' '")')" -replace "''", "'"
         $previousWord = $commandAst.CommandElements[0].Value
         $COMP_CWORD = 1
+        $COMP_POINT = $cursorPosition - $commandAst.Extent.StartOffset
         for ($i = 1; $i -lt $commandAst.CommandElements.Count; $i++) {
             $extent = $commandAst.CommandElements[$i].Extent
             if ($cursorPosition -lt $extent.EndColumnNumber) {
@@ -179,7 +180,7 @@ function global:Import-WslCommand() {
         # Build the command to pass to WSL.
         $bashCompletion = ". /usr/share/bash-completion/bash_completion 2> /dev/null"
         $commandCompletion = "__load_completion $command 2> /dev/null"
-        $COMPINPUT = "COMP_LINE=$COMP_LINE; COMP_WORDS=$COMP_WORDS; COMP_CWORD=$COMP_CWORD; COMP_POINT=$cursorPosition"
+        $COMPINPUT = "COMP_LINE=$COMP_LINE; COMP_WORDS=$COMP_WORDS; COMP_CWORD=$COMP_CWORD; COMP_POINT=$COMP_POINT"
         $COMPGEN = "bind `"set completion-ignore-case on`" 2> /dev/null; $($WslCompletionFunctions[$command]) `"$command`" `"$wordToComplete`" `"$previousWord`" 2> /dev/null"
         $COMPREPLY = "IFS=`$'\n'; echo `"`${COMPREPLY[*]}`""
         $commandLine = "$bashCompletion; $commandCompletion; $COMPINPUT; $COMPGEN; $COMPREPLY"
