@@ -45,7 +45,7 @@ The import of these functions replaces any PowerShell aliases that conflict with
     * Ensure the `bash-completion` package is installed with `sudo apt install bash-completion` or equivalent command
 * Install the WslInterop module with  `Install-Module WslInterop`
 * Import commands with `Import-WslCommand`
-    * `Import-WslCommand "apt", "awk", "emacs", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "sudo", "tail", "vim"` for example
+    * `Import-WslCommand "apt", "awk", "emacs", "find", "grep", "head", "less", "ls", "man", "sed", "seq", "ssh", "sudo", "tail", "vim"` for example
     * Add this to your [profile](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles) for persistent access
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslDefaultParameterValues` and set default arguments for commands using the following patterns:
     * `$WslDefaultParameterValues["<COMMAND>"] = "<ARGS>"`
