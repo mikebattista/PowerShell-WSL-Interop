@@ -97,9 +97,9 @@ function global:Import-WslCommand() {
         # Invoke the command.
         if (`$input.MoveNext()) {
             `$input.Reset()
-            `$input | wsl.exe `$commandLine
+            Invoke-Expression "`$input | wsl.exe `$commandLine"
         } else {
-            wsl.exe `$commandLine
+            Invoke-Expression "wsl.exe `$commandLine"
         }
     }
 "@
