@@ -90,9 +90,25 @@ function global:Import-WslCommand() {
         `$distribution = ("-d `$(`$WslDefaultParameterValues."-d")", "")[`$WslDefaultParameterValues."-d" -eq `$null]
         `$username = ("-u `$(`$WslDefaultParameterValues."-u")", "")[`$WslDefaultParameterValues."-u" -eq `$null]
         `$environmentVariables = ((`$WslEnvironmentVariables.Keys | ForEach-Object { "`$_='`$(`$WslEnvironmentVariables."`$_")'" }), "")[`$WslEnvironmentVariables.Count -eq 0]
-        `$defaultArgs = (`$WslDefaultParameterValues."$_", "")[`$WslDefaultParameterValues.Disabled -eq `$true]
+        `$defaultArgs = (`$WslDefaultParameterValues."$_", "")[`$WslDefaultParameterValues."$_" -eq `$null -or `$WslDefaultParameterValues.Disabled -eq `$true]
         if (`$defaultArgs -is [scriptblock]) { `$defaultArgs = . `$defaultArgs }
-        `$commandLine = "`$distribution `$username `$environmentVariables $_ `$defaultArgs `$args" -split ' '
+        
+        `$commandLine = ""
+        if (`$distribution -ne "") {
+            `$commandLine += "`$distribution "
+        }
+        if (`$username -ne "") {
+            `$commandLine += "`$username "
+        }
+        if (`$environmentVariables -ne "") {
+            `$commandLine += "`$environmentVariables "
+        }
+        `$commandLine += "$_ "
+        if (`$defaultArgs -ne "") {
+            `$commandLine += "`$defaultArgs "
+        }
+        `$commandLine += "`$args"
+        `$commandLine = "`$commandLine".Trim() -split ' '
 
         # Invoke the command.
         if (`$input.MoveNext()) {
