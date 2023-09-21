@@ -113,7 +113,9 @@ function global:Import-WslCommand() {
         # Invoke the command.
         if (`$input.MoveNext()) {
             `$input.Reset()
-            `$input | wsl.exe `$commandLine
+            `$inputFile = "/tmp/wslPipe.`$(New-Guid)"
+            `$input | Out-String -Stream | wsl -e bash -c "cat > `$inputFile"
+            wsl.exe -e bash -c "cat `$inputFile | $_ `$(`$args -split ' ') && rm `$inputFile"
         } else {
             wsl.exe `$commandLine
         }
