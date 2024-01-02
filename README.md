@@ -54,10 +54,10 @@ The import of these functions replaces any PowerShell aliases that conflict with
         * `<SCRIPTBLOCK>` will be executed at runtime to determine the default arguments for `<COMMAND>`
     * `$WslDefaultParameterValues["-d"] = "<DISTRIBUTION>"`
         * The distribution WSL uses will be changed by setting `wsl -d <DISTRIBUTION>`
-    * `$WslDefaultParameterValues["--shell-type"] = "<SHELL_TYPE>"`
-        * The shell-type the WSL uses will be changed by setting `wsl --shell-type <SHELL_TYPE>` (standard|login|none)
     * `$WslDefaultParameterValues["-u"] = "<USERNAME>"`
         * The username WSL uses will be changed by setting `wsl -u <USERNAME>`
+    * `$WslDefaultParameterValues["--shell-type"] = "<SHELLTYPE>"`
+        * The shell type WSL uses will be changed by setting `wsl --shell-type <SHELLTYPE>` where `<SHELLTYPE>` is either `standard`, `login`, or `none`
 * (Optionally) Define a [hash table](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_hash_tables?view=powershell-6#creating-hash-tables) called `$WslEnvironmentVariables` and set environment variables using the pattern `$WslEnvironmentVariables["<NAME>"] = "<VALUE>"` or use [WSLENV](https://devblogs.microsoft.com/commandline/share-environment-vars-between-wsl-and-windows/)
 
 ## Known Issues
