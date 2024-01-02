@@ -89,6 +89,7 @@ function global:Import-WslCommand() {
         # Build the command to pass to WSL.
         `$distribution = ("-d `$(`$WslDefaultParameterValues."-d")", "")[`$WslDefaultParameterValues."-d" -eq `$null]
         `$username = ("-u `$(`$WslDefaultParameterValues."-u")", "")[`$WslDefaultParameterValues."-u" -eq `$null]
+        `$shelltype = ("--shell-type `$(`$WslDefaultParameterValues."--shell-type")", "")[`$WslDefaultParameterValues."--shell-type" -eq `$null]
         `$environmentVariables = ((`$WslEnvironmentVariables.Keys | ForEach-Object { "`$_='`$(`$WslEnvironmentVariables."`$_")'" }), "")[`$WslEnvironmentVariables.Count -eq 0]
         `$defaultArgs = (`$WslDefaultParameterValues."$_", "")[`$WslDefaultParameterValues."$_" -eq `$null -or `$WslDefaultParameterValues.Disabled -eq `$true]
         if (`$defaultArgs -is [scriptblock]) { `$defaultArgs = . `$defaultArgs }
@@ -99,6 +100,9 @@ function global:Import-WslCommand() {
         }
         if (`$username -ne "") {
             `$commandLine += "`$username "
+        }
+        if (`$shelltype -ne "") {
+            `$commandLine += "`$shelltype "
         }
         if (`$environmentVariables -ne "") {
             `$commandLine += "`$environmentVariables "
